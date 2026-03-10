@@ -1,6 +1,8 @@
+
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { 
   ChevronRight, Box, RotateCcw, Zap, 
   QrCode, Star, Trophy, ArrowLeft, Gift, 
@@ -8,6 +10,7 @@ import {
 } from "lucide-react"
 import { GlassButton } from "@/components/ma/GlassButton"
 import { CouponRewards, saveGameSession } from "@/lib/coupon-service"
+import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { cn } from "@/lib/utils"
 
 type AppState = 'hero' | 'choice' | 'game-box' | 'game-wheel' | 'game-speed' | 'game-memory' | 'result' | 'google-incentive' | 'qr-code'
@@ -28,6 +31,8 @@ export default function TotemExperience() {
   // Memory Game State
   const [memoryCards, setMemoryCards] = React.useState<{id: number, icon: any, isFlipped: boolean, isMatched: boolean}[]>([])
   const [flippedCards, setFlippedCards] = React.useState<number[]>([])
+
+  const maLogo = PlaceHolderImages.find(img => img.id === 'ma-logo')?.imageUrl || ""
 
   const resetToHero = React.useCallback(() => {
     setState('hero')
@@ -175,11 +180,14 @@ export default function TotemExperience() {
         state === 'hero' ? "bg-transparent border-white/5" : "glass-nav border-b border-[#001D3D]/5"
       )}>
         <div className="flex items-center gap-4 cursor-pointer" onClick={resetToHero}>
-          <div className={cn(
-            "w-12 h-12 rounded-2xl flex items-center justify-center transition-all",
-            state === 'hero' ? "bg-[#C5A059] text-white" : "bg-[#001D3D] text-[#C5A059]"
-          )}>
-            <Smartphone className="w-6 h-6" />
+          <div className="relative w-16 h-16">
+            <Image 
+              src={maLogo} 
+              alt="MA Imports Logo" 
+              fill 
+              className="object-contain"
+              priority
+            />
           </div>
           <span className={cn(
             "text-2xl font-bold tracking-tight transition-colors",
@@ -198,6 +206,14 @@ export default function TotemExperience() {
         {/* TELA 1: HERO */}
         {state === 'hero' && (
           <div className="flex flex-col items-center text-center px-12 animate-reveal max-w-5xl">
+            <div className="relative w-32 h-32 mb-12 animate-float">
+               <Image 
+                src={maLogo} 
+                alt="MA Logo" 
+                fill 
+                className="object-contain"
+              />
+            </div>
             <h1 className="text-[clamp(3.5rem,10vw,7rem)] font-extrabold tracking-tight leading-[1] mb-12 text-white">
               Teste sua <span className="text-[#C5A059]">sorte.</span>
             </h1>
@@ -287,7 +303,9 @@ export default function TotemExperience() {
                     />
                   ))}
                   <div className="absolute z-20 w-40 h-40 bg-white rounded-full shadow-xl flex items-center justify-center">
-                    <Smartphone className="w-12 h-12 text-[#C5A059]" />
+                    <div className="relative w-20 h-20">
+                      <Image src={maLogo} alt="MA Logo" fill className="object-contain" />
+                    </div>
                   </div>
                 </div>
               </div>
