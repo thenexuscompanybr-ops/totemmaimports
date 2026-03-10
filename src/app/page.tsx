@@ -166,28 +166,28 @@ export default function TotemExperience() {
   return (
     <main className={cn(
       "fixed inset-0 w-screen h-screen flex flex-col overflow-hidden select-none transition-all duration-700 ease-in-out",
-      state === 'hero' ? "bg-gradient-to-br from-[#001D3D] via-[#001021] to-[#000814]" : "bg-[#F7F8FA]"
+      state === 'hero' ? "bg-gradient-to-br from-[#001D3D] via-[#000814] to-[#000000]" : "bg-[#F7F8FA]"
     )}>
       
       {/* Header Fixo */}
       <header className={cn(
         "h-24 px-12 flex justify-between items-center z-50 transition-colors duration-500",
-        state === 'hero' ? "bg-transparent border-white/5" : "glass-nav border-b border-black/5"
+        state === 'hero' ? "bg-transparent border-white/5" : "glass-nav border-b border-[#001D3D]/5"
       )}>
         <div className="flex items-center gap-4 cursor-pointer" onClick={resetToHero}>
           <div className={cn(
-            "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors",
-            state === 'hero' ? "bg-white text-blue-950" : "bg-black text-white"
+            "w-12 h-12 rounded-2xl flex items-center justify-center transition-all",
+            state === 'hero' ? "bg-[#C5A059] text-white" : "bg-[#001D3D] text-[#C5A059]"
           )}>
             <Smartphone className="w-6 h-6" />
           </div>
           <span className={cn(
             "text-2xl font-bold tracking-tight transition-colors",
-            state === 'hero' ? "text-white" : "text-black"
+            state === 'hero' ? "text-white" : "text-[#001D3D]"
           )}>MA Discovery</span>
         </div>
         {state !== 'hero' && (
-          <button onClick={resetToHero} className="flex items-center gap-2 text-lg font-bold opacity-30 active:opacity-100">
+          <button onClick={resetToHero} className="flex items-center gap-2 text-lg font-bold text-[#001D3D]/40 active:text-[#001D3D]">
             <ArrowLeft className="w-5 h-5" /> Início
           </button>
         )}
@@ -199,16 +199,16 @@ export default function TotemExperience() {
         {state === 'hero' && (
           <div className="flex flex-col items-center text-center px-12 animate-reveal max-w-5xl">
             <h1 className="text-[clamp(3.5rem,10vw,7rem)] font-extrabold tracking-tight leading-[1] mb-12 text-white">
-              Teste sua <span className="text-white/40">sorte.</span>
+              Teste sua <span className="text-[#C5A059]">sorte.</span>
             </h1>
             <p className="text-2xl md:text-3xl text-white/50 font-medium mb-20 max-w-3xl leading-relaxed">
-              Interaja com nossa tecnologia e ganhe um benefício exclusivo agora mesmo.
+              Interaja com nossa tecnologia e ganhe um benefício exclusivo agora mesmo na MA Imports.
             </p>
             <GlassButton 
               size="totem" 
-              variant="secondary"
+              variant="gold"
               onClick={() => setState('choice')} 
-              className="w-full max-w-md shadow-[0_20px_60px_rgba(255,255,255,0.1)]"
+              className="w-full max-w-md"
             >
               COMEÇAR <ChevronRight className="w-8 h-8" />
             </GlassButton>
@@ -218,7 +218,7 @@ export default function TotemExperience() {
         {/* TELA DE ESCOLHA */}
         {state === 'choice' && (
           <div className="w-full max-w-7xl px-12 animate-reveal text-center">
-            <h2 className="text-5xl font-bold mb-20 tracking-tight">Qual desafio você prefere?</h2>
+            <h2 className="text-5xl font-bold mb-20 tracking-tight text-[#001D3D]">Qual desafio você prefere?</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               {[
                 { id: 'game-box', icon: Box, name: 'Caixa Surpresa', desc: 'Sua intuição.', action: () => setState('game-box') },
@@ -229,13 +229,13 @@ export default function TotemExperience() {
                 <button
                   key={game.id}
                   onClick={game.action}
-                  className="bg-white p-12 rounded-[40px] shadow-sm border border-black/5 flex flex-col items-center group active:scale-95 transition-all duration-300"
+                  className="bg-white p-12 rounded-[40px] shadow-sm border border-[#001D3D]/5 flex flex-col items-center group active:scale-95 transition-all duration-300"
                 >
-                  <div className="w-20 h-20 rounded-3xl bg-black/5 flex items-center justify-center mb-8 group-active:bg-black group-active:text-white transition-colors">
-                    <game.icon className="w-8 h-8" />
+                  <div className="w-20 h-20 rounded-3xl bg-[#001D3D]/5 flex items-center justify-center mb-8 group-active:bg-[#C5A059] group-active:text-white transition-colors">
+                    <game.icon className="w-8 h-8 text-[#C5A059]" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-2 tracking-tight">{game.name}</h3>
-                  <p className="text-lg text-black/40 font-medium">{game.desc}</p>
+                  <h3 className="text-2xl font-bold mb-2 tracking-tight text-[#001D3D]">{game.name}</h3>
+                  <p className="text-lg text-[#001D3D]/40 font-medium">{game.desc}</p>
                 </button>
               ))}
             </div>
@@ -245,18 +245,18 @@ export default function TotemExperience() {
         {/* GAME: CAIXA SURPRESA */}
         {state === 'game-box' && (
           <div className="w-full max-w-6xl px-12 animate-reveal text-center">
-            <h2 className="text-4xl font-bold mb-16 opacity-40">Escolha uma caixa</h2>
+            <h2 className="text-4xl font-bold mb-16 text-[#001D3D]/40">Escolha uma caixa</h2>
             <div className="grid grid-cols-3 gap-8">
               {[0, 1, 2].map((i) => (
                 <button 
                   key={i} 
                   onClick={() => { setSelectedBox(i); finalizeGame('Caixa Surpresa'); }}
                   className={cn(
-                    "relative aspect-square bg-white rounded-[40px] border border-black/5 flex items-center justify-center active:scale-90 transition-all duration-300 shadow-sm",
-                    selectedBox === i && "border-black animate-pulse"
+                    "relative aspect-square bg-white rounded-[40px] border border-[#001D3D]/5 flex items-center justify-center active:scale-90 transition-all duration-300 shadow-sm",
+                    selectedBox === i && "border-[#C5A059] animate-pulse"
                   )}
                 >
-                  <Gift className="w-24 h-24 text-black/10" />
+                  <Gift className="w-24 h-24 text-[#C5A059]/20" />
                 </button>
               ))}
             </div>
@@ -268,11 +268,11 @@ export default function TotemExperience() {
           <div className="flex flex-col items-center animate-reveal">
             <div className="relative mb-20">
               <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-30">
-                <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[40px] border-t-black" />
+                <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[40px] border-t-[#C5A059]" />
               </div>
-              <div className="p-6 bg-white rounded-full shadow-2xl border border-black/5">
+              <div className="p-6 bg-white rounded-full shadow-2xl border border-[#001D3D]/5">
                 <div 
-                  className="w-[450px] h-[450px] md:w-[600px] md:h-[600px] rounded-full bg-[#F7F8FA] relative transition-transform duration-[3000ms] ease-[cubic-bezier(0.15,0,0.15,1)] flex items-center justify-center overflow-hidden border border-black/5"
+                  className="w-[450px] h-[450px] md:w-[600px] md:h-[600px] rounded-full bg-[#F7F8FA] relative transition-transform duration-[3000ms] ease-[cubic-bezier(0.15,0,0.15,1)] flex items-center justify-center overflow-hidden border border-[#001D3D]/5"
                   style={{ transform: `rotate(${rotation}deg)` }}
                 >
                   {[0, 1, 2, 3].map((_, i) => (
@@ -281,18 +281,18 @@ export default function TotemExperience() {
                       className="absolute w-full h-full" 
                       style={{ 
                         transform: `rotate(${i * 90}deg)`,
-                        background: i % 2 === 0 ? 'white' : 'rgba(0,0,0,0.02)',
+                        background: i % 2 === 0 ? 'white' : 'rgba(0,29,61,0.02)',
                         transformOrigin: 'center'
                       }} 
                     />
                   ))}
                   <div className="absolute z-20 w-40 h-40 bg-white rounded-full shadow-xl flex items-center justify-center">
-                    <Smartphone className="w-12 h-12 text-black" />
+                    <Smartphone className="w-12 h-12 text-[#C5A059]" />
                   </div>
                 </div>
               </div>
             </div>
-            <GlassButton size="totem" onClick={spinWheel} disabled={isSpinning} className="w-full min-w-[400px]">
+            <GlassButton variant="gold" size="totem" onClick={spinWheel} disabled={isSpinning} className="w-full min-w-[400px]">
               {isSpinning ? 'Girando...' : 'GIRAR AGORA'}
             </GlassButton>
           </div>
@@ -303,19 +303,19 @@ export default function TotemExperience() {
           <div className="w-full max-w-5xl px-12 animate-reveal flex flex-col items-center">
             {!speedActive && speedScore === 0 ? (
               <div className="text-center">
-                <h2 className="text-5xl font-extrabold mb-12">Você é rápido?</h2>
-                <GlassButton size="totem" onClick={startSpeedGame} className="min-w-[400px]">COMEÇAR (5s)</GlassButton>
+                <h2 className="text-5xl font-extrabold mb-12 text-[#001D3D]">Você é rápido?</h2>
+                <GlassButton variant="gold" size="totem" onClick={startSpeedGame} className="min-w-[400px]">COMEÇAR (5s)</GlassButton>
               </div>
             ) : (
               <div className="w-full flex flex-col items-center">
                 <div className="flex justify-between w-full mb-12">
-                  <div className="text-3xl font-bold opacity-30 uppercase tracking-widest">Tempo: {timeLeft}s</div>
-                  <div className="text-3xl font-bold uppercase tracking-widest">Score: {speedScore}</div>
+                  <div className="text-3xl font-bold text-[#001D3D]/30 uppercase tracking-widest">Tempo: {timeLeft}s</div>
+                  <div className="text-3xl font-bold uppercase tracking-widest text-[#C5A059]">Score: {speedScore}</div>
                 </div>
-                <div className="relative w-full aspect-[16/9] bg-white border-2 border-black/5 rounded-[48px] overflow-hidden shadow-inner">
+                <div className="relative w-full aspect-[16/9] bg-white border-2 border-[#001D3D]/5 rounded-[48px] overflow-hidden shadow-inner">
                   <button
                     onClick={handleTargetHit}
-                    className="absolute w-32 h-32 bg-black text-white rounded-[32px] shadow-2xl flex items-center justify-center transition-all duration-100 active:scale-125"
+                    className="absolute w-32 h-32 bg-[#001D3D] text-[#C5A059] rounded-[32px] shadow-2xl flex items-center justify-center transition-all duration-100 active:scale-125"
                     style={{ top: targetPos.top, left: targetPos.left }}
                   >
                     <Zap className="w-12 h-12 fill-current" />
@@ -329,21 +329,21 @@ export default function TotemExperience() {
         {/* GAME: MEMORY */}
         {state === 'game-memory' && (
           <div className="w-full max-w-4xl px-12 animate-reveal text-center">
-            <h2 className="text-4xl font-bold mb-12 opacity-40">Combine os pares</h2>
+            <h2 className="text-4xl font-bold mb-12 text-[#001D3D]/40">Combine os pares</h2>
             <div className="grid grid-cols-4 gap-6">
               {memoryCards.map((card) => (
                 <button
                   key={card.id}
                   onClick={() => handleCardClick(card.id)}
                   className={cn(
-                    "aspect-square rounded-3xl border border-black/5 flex items-center justify-center text-4xl transition-all duration-500 transform perspective-1000",
-                    card.isFlipped || card.isMatched ? "bg-white rotate-y-0" : "bg-black/5 rotate-y-180"
+                    "aspect-square rounded-3xl border border-[#001D3D]/5 flex items-center justify-center text-4xl transition-all duration-500 transform perspective-1000",
+                    card.isFlipped || card.isMatched ? "bg-white rotate-y-0" : "bg-[#001D3D]/5 rotate-y-180"
                   )}
                 >
                   {(card.isFlipped || card.isMatched) ? (
-                    <card.icon className="w-12 h-12 text-black" />
+                    <card.icon className="w-12 h-12 text-[#C5A059]" />
                   ) : (
-                    <div className="w-12 h-12 bg-black/10 rounded-full" />
+                    <div className="w-12 h-12 bg-[#C5A059]/10 rounded-full" />
                   )}
                 </button>
               ))}
@@ -354,15 +354,15 @@ export default function TotemExperience() {
         {/* TELA 3: RESULTADO */}
         {state === 'result' && (
           <div className="flex flex-col items-center text-center px-12 animate-reveal">
-            <div className="w-32 h-32 rounded-[40px] bg-black flex items-center justify-center mb-16 shadow-2xl animate-float">
-              <Trophy className="w-16 h-16 text-white" />
+            <div className="w-32 h-32 rounded-[40px] bg-[#001D3D] flex items-center justify-center mb-16 shadow-2xl animate-float">
+              <Trophy className="w-16 h-16 text-[#C5A059]" />
             </div>
-            <h2 className="text-6xl font-bold mb-6 tracking-tight">Parabéns!</h2>
-            <p className="text-xl uppercase tracking-[0.4em] font-bold opacity-30 mb-16">Seu benefício exclusivo é:</p>
-            <div className="bg-white border border-black/5 px-20 py-16 rounded-[48px] shadow-sm mb-20">
-               <h3 className="text-4xl md:text-6xl font-black tracking-tight">{reward}</h3>
+            <h2 className="text-6xl font-bold mb-6 tracking-tight text-[#001D3D]">Parabéns!</h2>
+            <p className="text-xl uppercase tracking-[0.4em] font-bold text-[#001D3D]/30 mb-16">Seu benefício exclusivo é:</p>
+            <div className="bg-white border border-[#C5A059]/20 px-20 py-16 rounded-[48px] shadow-sm mb-20">
+               <h3 className="text-4xl md:text-6xl font-black tracking-tight text-[#C5A059]">{reward}</h3>
             </div>
-            <GlassButton size="totem" onClick={() => setState('google-incentive')} className="w-full max-w-md">
+            <GlassButton variant="gold" size="totem" onClick={() => setState('google-incentive')} className="w-full max-w-md">
               RESGATAR <ChevronRight className="w-8 h-8" />
             </GlassButton>
           </div>
@@ -372,13 +372,13 @@ export default function TotemExperience() {
         {state === 'google-incentive' && (
           <div className="flex flex-col items-center text-center px-12 animate-reveal">
             <div className="flex gap-2 mb-12">
-              {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-12 h-12 fill-yellow-400 text-yellow-400" />)}
+              {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-12 h-12 fill-[#C5A059] text-[#C5A059]" />)}
             </div>
-            <h2 className="text-5xl md:text-6xl font-bold mb-10 tracking-tight">Nos ajude a crescer.</h2>
-            <p className="text-2xl text-black/50 font-medium mb-20 max-w-2xl leading-relaxed">
-              Sua avaliação no Google é muito importante para nós e para outros clientes.
+            <h2 className="text-5xl md:text-6xl font-bold mb-10 tracking-tight text-[#001D3D]">Nos ajude a crescer.</h2>
+            <p className="text-2xl text-[#001D3D]/50 font-medium mb-20 max-w-2xl leading-relaxed">
+              Sua avaliação no Google é muito importante para nós e para outros clientes MA Imports.
             </p>
-            <GlassButton variant="google" size="totem" onClick={() => setState('qr-code')} className="w-full max-w-lg">
+            <GlassButton variant="gold" size="totem" onClick={() => setState('qr-code')} className="w-full max-w-lg">
               AVALIAR AGORA
             </GlassButton>
           </div>
@@ -387,14 +387,14 @@ export default function TotemExperience() {
         {/* TELA 5: QR CODE */}
         {state === 'qr-code' && (
           <div className="flex flex-col items-center text-center px-12 animate-reveal">
-            <div className="bg-white p-20 rounded-[64px] mb-16 shadow-2xl border border-black/5 animate-reveal">
-              <QrCode className="w-72 h-72 text-black/90" />
+            <div className="bg-white p-20 rounded-[64px] mb-16 shadow-2xl border border-[#001D3D]/5 animate-reveal">
+              <QrCode className="w-72 h-72 text-[#001D3D]" />
             </div>
-            <h2 className="text-4xl font-bold mb-6 tracking-tight">Escaneie para avaliar</h2>
-            <p className="text-xl text-black/30 font-bold uppercase tracking-[0.3em] mb-20">
+            <h2 className="text-4xl font-bold mb-6 tracking-tight text-[#001D3D]">Escaneie para avaliar</h2>
+            <p className="text-xl text-[#001D3D]/30 font-bold uppercase tracking-[0.3em] mb-20">
               Obrigado pela preferência!
             </p>
-            <div className="text-sm font-bold opacity-10 uppercase tracking-widest">
+            <div className="text-sm font-bold text-[#C5A059]/40 uppercase tracking-widest">
               O totem reiniciará em instantes...
             </div>
           </div>
@@ -405,11 +405,11 @@ export default function TotemExperience() {
       {/* Footer Fixo */}
       <footer className={cn(
         "h-20 px-12 flex justify-center items-center border-t transition-colors duration-500",
-        state === 'hero' ? "border-white/5 bg-black/20" : "border-black/5 bg-white/50"
+        state === 'hero' ? "border-white/5 bg-black/20" : "border-[#001D3D]/5 bg-white/50"
       )}>
         <span className={cn(
-          "text-xs tracking-[0.6em] font-black uppercase opacity-10",
-          state === 'hero' ? "text-white" : "text-black"
+          "text-xs tracking-[0.6em] font-black uppercase opacity-20",
+          state === 'hero' ? "text-white" : "text-[#001D3D]"
         )}>
           MA IMPORTS — PREMIUM KIOSK EXPERIENCE
         </span>
