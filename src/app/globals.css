@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%; /* Apple Off-White #F5F5F7 */
-    --foreground: 0 0% 12%; /* Apple Dark Gray #1D1D1F */
+    --background: 0 0% 100%; /* Pure White */
+    --foreground: 0 0% 11%; /* Apple Black #1D1D1F */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 12%;
+    --card-foreground: 0 0% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 12%;
+    --popover-foreground: 0 0% 11%;
     --primary: 0 0% 0%; /* Black */
     --primary-foreground: 0 0% 100%; /* White */
-    --secondary: 0 0% 92%;
-    --secondary-foreground: 0 0% 12%;
+    --secondary: 0 0% 96%; /* #F5F5F7 */
+    --secondary-foreground: 0 0% 11%;
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
     --accent: 0 0% 0%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
+    --border: 0 0% 92%;
+    --input: 0 0% 92%;
     --ring: 0 0% 0%;
-    --radius: 2rem;
+    --radius: 3rem;
   }
 }
 
@@ -31,44 +31,25 @@
   * {
     @apply border-border;
     -webkit-tap-highlight-color: transparent;
-    user-select: none; /* Previne seleção de texto no Totem */
+    user-select: none;
   }
   body {
-    @apply bg-background text-foreground overflow-x-hidden;
+    @apply bg-background text-foreground overflow-x-hidden selection:bg-black selection:text-white;
     font-feature-settings: "cv11", "ss01", "ss02";
     -webkit-font-smoothing: antialiased;
-    touch-action: manipulation; /* Otimiza para toque, evita zoom duplo */
+    touch-action: manipulation;
   }
 }
 
-/* Esconde barras de rolagem mas mantém funcionalidade */
+/* Hide scrollbars but keep functionality */
 ::-webkit-scrollbar {
   display: none;
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-30px); }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-8px) rotate(-1.5deg); }
-  75% { transform: translateX(8px) rotate(1.5deg); }
-}
-
-.animate-shake {
-  animation: shake 0.2s ease-in-out infinite;
-}
-
 .apple-blur {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(30px) saturate(200%);
-  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
 }
 
 .glow-bg {
@@ -78,18 +59,48 @@
   transform: translate(-50%, -50%);
   width: 150vw;
   height: 150vh;
-  background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.02) 0%, transparent 60%);
+  background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.015) 0%, transparent 70%);
   z-index: -1;
   pointer-events: none;
 }
 
-/* Wheel Segments com cores neutras Apple */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px) rotate(-0.5deg); }
+  75% { transform: translateX(4px) rotate(0.5deg); }
+}
+
+.animate-shake {
+  animation: shake 0.2s ease-in-out infinite;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
 .wheel-segment {
   position: absolute;
   width: 50%;
   height: 50%;
   transform-origin: 100% 100%;
-  border: 1px solid rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.02);
 }
 
 .wheel-segment:nth-child(1) { transform: rotate(0deg) skewY(-45deg); background: #ffffff; }
