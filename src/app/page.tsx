@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -69,8 +68,8 @@ export default function TotemExperience() {
     }
   }, [state, resetToHero]);
 
-  const finalizeGame = (gameName: string) => {
-    const prize = CouponRewards[Math.floor(Math.random() * CouponRewards.length)]
+  const finalizeGame = (gameName: string, selectedReward?: string) => {
+    const prize = selectedReward || CouponRewards[Math.floor(Math.random() * CouponRewards.length)]
     setReward(prize)
     saveGameSession(gameName, prize)
     setTimeout(() => {
@@ -81,17 +80,29 @@ export default function TotemExperience() {
   // Improved Wheel Logic
   const startSpinning = () => {
     setSpinPhase('spinning')
-    setRotation(r => r + 360)
+    // Reset rotation slightly to keep the math clean if needed
+    setRotation(r => r % 360)
   }
 
   const stopSpinning = () => {
     setSpinPhase('stopping')
-    const extraDegrees = 1440 + Math.random() * 360
-    const finalRotation = rotation + extraDegrees
+    
+    // Pick a random reward index (0-7)
+    const prizeIndex = Math.floor(Math.random() * CouponRewards.length)
+    const selectedPrize = CouponRewards[prizeIndex]
+    
+    // Each slice is 45 degrees. 
+    // To land on slice X (0-indexed), we need to rotate to (360 - (X * 45)) degrees
+    // We add multiple full rotations (e.g., 5 * 360) for effect
+    const sliceAngle = 360 / CouponRewards.length
+    const offset = sliceAngle / 2 // Offset to land in the middle of the slice
+    const targetRotation = 360 - (prizeIndex * sliceAngle)
+    
+    const finalRotation = rotation + (360 * 5) + targetRotation - (rotation % 360)
     setRotation(finalRotation)
     
     setTimeout(() => {
-      finalizeGame('Roda Tech')
+      finalizeGame('Roda Tech', selectedPrize)
     }, 3200)
   }
 
@@ -229,8 +240,8 @@ export default function TotemExperience() {
 
         {/* SCREEN: CHOICE */}
         {state === 'choice' && (
-          <div className="w-full max-w-5xl animate-reveal text-center">
-            <h2 className="text-4xl md:text-5xl font-black mb-16 tracking-tighter text-white uppercase">Escolha seu desafio</h2>
+          <div className="w-full max-w-4xl animate-reveal text-center">
+            <h2 className="text-3xl md:text-4xl font-black mb-12 tracking-tighter text-white uppercase">Escolha seu desafio</h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 { id: 'game-box', icon: Box, name: 'Caixas', desc: 'Intuição', action: () => setState('game-box') },
@@ -241,13 +252,13 @@ export default function TotemExperience() {
                 <button
                   key={game.id}
                   onClick={game.action}
-                  className="bg-white/5 p-8 rounded-[40px] border border-white/10 flex flex-col items-center group active:scale-95 transition-all duration-300 backdrop-blur-3xl hover:bg-white/10"
+                  className="bg-white/5 p-6 rounded-[32px] border border-white/10 flex flex-col items-center group active:scale-95 transition-all duration-300 backdrop-blur-3xl hover:bg-white/10"
                 >
-                  <div className="w-16 h-16 rounded-[20px] bg-[#C5A059]/10 flex items-center justify-center mb-6 group-active:bg-[#C5A059] transition-colors">
-                    <game.icon className="w-7 h-7 text-[#C5A059] group-active:text-white" />
+                  <div className="w-14 h-14 rounded-[18px] bg-[#C5A059]/10 flex items-center justify-center mb-4 group-active:bg-[#C5A059] transition-colors">
+                    <game.icon className="w-6 h-6 text-[#C5A059] group-active:text-white" />
                   </div>
-                  <h3 className="text-xl font-black mb-1 tracking-tight text-white uppercase">{game.name}</h3>
-                  <p className="text-sm text-white/30 font-bold uppercase tracking-widest">{game.desc}</p>
+                  <h3 className="text-lg font-black mb-1 tracking-tight text-white uppercase">{game.name}</h3>
+                  <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">{game.desc}</p>
                 </button>
               ))}
             </div>
@@ -278,34 +289,37 @@ export default function TotemExperience() {
         {/* GAME: ROLETA TECH */}
         {state === 'game-wheel' && (
           <div className="flex flex-col items-center animate-reveal">
-            <div className="relative mb-16">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-30">
-                <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[40px] border-t-[#C5A059] filter drop-shadow-lg" />
+            <div className="relative mb-12">
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-40">
+                <div className="w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-t-[50px] border-t-[#C5A059] filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]" />
               </div>
-              <div className="p-6 bg-white/5 rounded-full border border-white/10 backdrop-blur-3xl">
+              <div className="p-8 bg-white/5 rounded-full border border-white/10 backdrop-blur-3xl relative">
                 <div 
                   className={cn(
-                    "w-[450px] h-[450px] md:w-[600px] md:h-[600px] rounded-full bg-white/5 relative transition-transform duration-[3200ms] ease-[cubic-bezier(0.15,0,0.1,1)] flex items-center justify-center overflow-hidden border border-white/10",
-                    spinPhase === 'spinning' && "animate-[spin_0.8s_linear_infinite]"
+                    "w-[500px] h-[500px] md:w-[650px] md:h-[650px] rounded-full bg-white/5 relative transition-transform duration-[3200ms] ease-[cubic-bezier(0.15,0,0.1,1)] flex items-center justify-center overflow-hidden border-4 border-[#C5A059]/20",
+                    spinPhase === 'spinning' && "animate-[spin_1s_linear_infinite]"
                   )}
                   style={{ transform: spinPhase === 'stopping' ? `rotate(${rotation}deg)` : undefined }}
                 >
-                  {[0, 1, 2, 3, 4, 5, 6, 7].map((_, i) => (
+                  {CouponRewards.map((prize, i) => (
                     <div 
                       key={i} 
                       className="absolute w-full h-full" 
                       style={{ 
-                        transform: `rotate(${i * 45}deg)`,
-                        background: i % 2 === 0 ? 'rgba(197, 160, 89, 0.05)' : 'transparent',
+                        transform: `rotate(${i * (360 / CouponRewards.length)}deg)`,
+                        background: i % 2 === 0 ? 'rgba(197, 160, 89, 0.08)' : 'transparent',
                         transformOrigin: 'center'
                       }} 
                     >
-                       <div className="absolute top-8 left-1/2 -translate-x-1/2 text-white/5 font-black text-3xl uppercase tracking-tighter">
-                         MA
+                       <div 
+                        className="absolute top-12 left-1/2 -translate-x-1/2 text-white font-black text-xs md:text-sm uppercase tracking-tighter text-center max-w-[120px]"
+                        style={{ transform: 'rotate(0deg)' }}
+                       >
+                         {prize}
                        </div>
                     </div>
                   ))}
-                  <div className="absolute z-20 w-32 h-32 bg-[#001D3D] rounded-full shadow-[0_0_60px_rgba(0,0,0,0.5)] border border-white/10 flex items-center justify-center">
+                  <div className="absolute z-30 w-32 h-32 bg-[#001D3D] rounded-full shadow-[0_0_80px_rgba(0,0,0,0.8)] border-4 border-[#C5A059] flex items-center justify-center">
                     <div className="relative w-16 h-16">
                       <Image src={maLogo} alt="MA Logo" fill className="object-contain" />
                     </div>
@@ -333,7 +347,7 @@ export default function TotemExperience() {
 
               {spinPhase === 'stopping' && (
                 <GlassButton variant="gold" disabled className="w-full opacity-80">
-                  DESACELERANDO...
+                  SORTEANDO...
                 </GlassButton>
               )}
             </div>
@@ -396,13 +410,13 @@ export default function TotemExperience() {
         {/* SCREEN 3: RESULT */}
         {state === 'result' && (
           <div className="flex flex-col items-center text-center animate-reveal">
-            <div className="w-32 h-32 rounded-[32px] bg-[#C5A059] flex items-center justify-center mb-12 shadow-[0_30px_60px_rgba(197,160,89,0.3)] animate-float">
-              <Trophy className="w-16 h-16 text-[#001D3D]" />
+            <div className="w-24 h-24 rounded-[24px] bg-[#C5A059] flex items-center justify-center mb-8 shadow-[0_20px_40px_rgba(197,160,89,0.3)] animate-float">
+              <Trophy className="w-12 h-12 text-[#001D3D]" />
             </div>
-            <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tighter text-white uppercase">Excelente!</h2>
-            <p className="text-lg uppercase tracking-[0.4em] font-black text-white/30 mb-12">Seu benefício exclusivo é:</p>
-            <div className="bg-white/5 border border-[#C5A059]/30 px-12 py-10 rounded-[48px] backdrop-blur-3xl mb-16 shadow-2xl max-w-2xl">
-               <h3 className="text-4xl md:text-5xl font-black tracking-tighter text-[#C5A059] uppercase leading-tight">{reward}</h3>
+            <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tighter text-white uppercase">Excelente!</h2>
+            <p className="text-sm uppercase tracking-[0.4em] font-black text-white/30 mb-8">Seu benefício exclusivo é:</p>
+            <div className="bg-white/5 border border-[#C5A059]/30 px-10 py-8 rounded-[40px] backdrop-blur-3xl mb-12 shadow-2xl max-w-xl">
+               <h3 className="text-3xl md:text-4xl font-black tracking-tighter text-[#C5A059] uppercase leading-tight">{reward}</h3>
             </div>
             <GlassButton variant="gold" onClick={() => setState('google-incentive')} className="w-full max-w-lg">
               RESGATAR <ChevronRight className="w-8 h-8" />

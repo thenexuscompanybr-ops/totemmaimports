@@ -7,12 +7,14 @@ export interface SessionData {
 }
 
 export const CouponRewards = [
-  "10% de desconto em acessórios",
-  "Película 3D de Brinde",
-  "R$ 100 de Bônus no iPhone Novo",
-  "Cabo Lightning/USB-C Grátis",
-  "Limpeza Técnica Cortesia",
-  "Upgrade de Memória Exclusivo"
+  "10% OFF ACESSÓRIOS",
+  "PELÍCULA 3D",
+  "R$ 100 BÔNUS",
+  "CABO USB-C",
+  "LIMPEZA TÉCNICA",
+  "UPGRADE MEMÓRIA",
+  "CHECK-UP GRÁTIS",
+  "BRINDE SURPRESA"
 ];
 
 export function saveGameSession(game: string, reward: string) {
