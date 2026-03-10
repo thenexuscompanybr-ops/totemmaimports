@@ -473,10 +473,8 @@ export default function TotemExperience() {
 
         {state === 'result' && (
           <div className="flex flex-col items-center text-center animate-reveal">
-            <div className="w-32 h-32 rounded-[32px] bg-white flex items-center justify-center mb-8 shadow-2xl p-4">
-              <div className="relative w-full h-full">
-                <Image src={qrImage} alt="QR" fill className="object-contain" />
-              </div>
+            <div className="w-32 h-32 rounded-[32px] bg-white/5 border border-[#C5A059]/30 flex items-center justify-center mb-8 shadow-2xl backdrop-blur-3xl">
+              <Trophy className="w-16 h-16 text-[#C5A059]" />
             </div>
             <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tighter text-white uppercase">Excelente!</h2>
             <p className="text-sm uppercase tracking-[0.4em] font-black text-white/30 mb-8">Seu benefício exclusivo é:</p>
