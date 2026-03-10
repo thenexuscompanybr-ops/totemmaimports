@@ -4,7 +4,7 @@ import * as React from "react"
 import Image from "next/image"
 import { 
   ChevronRight, Star, Smartphone, Box, RotateCcw, Zap, 
-  QrCode, MessageCircle, Trophy, ArrowLeft, Gift
+  QrCode, MessageCircle, Trophy, ArrowLeft, Gift, TouchpadIcon
 } from "lucide-react"
 import { GlassButton } from "@/components/ma/GlassButton"
 import { CouponRewards, saveGameSession } from "@/lib/coupon-service"
@@ -26,14 +26,37 @@ export default function MADiscovery() {
   const [targetPos, setTargetPos] = React.useState({ top: '50%', left: '50%' })
   const [selectedBox, setSelectedBox] = React.useState<number | null>(null)
 
-  const resetToHero = () => {
+  const resetToHero = React.useCallback(() => {
     setState('hero')
     setIsSpinning(false)
     setSpeedActive(false)
     setSpeedScore(0)
     setSelectedBox(null)
+    setReward(null)
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  }, [])
+
+  // Inactivity Timer for Totem (2 minutes)
+  React.useEffect(() => {
+    if (state === 'hero') return;
+
+    const timer = setTimeout(() => {
+      resetToHero();
+    }, 120000); // 2 minutes
+
+    const handleInteraction = () => {
+      clearTimeout(timer);
+    };
+
+    window.addEventListener('touchstart', handleInteraction);
+    window.addEventListener('mousedown', handleInteraction);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('touchstart', handleInteraction);
+      window.removeEventListener('mousedown', handleInteraction);
+    };
+  }, [state, resetToHero]);
 
   const finalizeGame = (gameName: string) => {
     const prize = CouponRewards[Math.floor(Math.random() * CouponRewards.length)]
@@ -42,7 +65,7 @@ export default function MADiscovery() {
     setTimeout(() => {
       setState('result')
       window.scrollTo({ top: 0, behavior: 'smooth' })
-    }, 800)
+    }, 1000)
   }
 
   // --- Roda Tech Logic ---
@@ -67,8 +90,8 @@ export default function MADiscovery() {
   }
 
   const moveTarget = () => {
-    const top = Math.random() * 70 + 15 + '%'
-    const left = Math.random() * 70 + 15 + '%'
+    const top = Math.random() * 60 + 20 + '%'
+    const left = Math.random() * 60 + 20 + '%'
     setTargetPos({ top, left })
   }
 
@@ -91,49 +114,49 @@ export default function MADiscovery() {
   const iphoneImg = PlaceHolderImages.find(img => img.id === 'iphone-hero')
 
   return (
-    <main className="relative z-10 mx-auto max-w-7xl min-h-screen flex flex-col pb-20 font-body antialiased">
+    <main className="relative z-10 mx-auto max-w-7xl min-h-screen flex flex-col pb-20 font-body antialiased selection:bg-transparent">
       {/* Navigation */}
-      <nav className="p-8 flex justify-between items-center animate-fade-in shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center shadow-lg">
-            <Smartphone className="w-6 h-6" />
+      <nav className="p-10 md:p-14 flex justify-between items-center animate-fade-in shrink-0">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center shadow-2xl">
+            <Smartphone className="w-8 h-8" />
           </div>
-          <span className="font-bold text-2xl tracking-tighter text-black">MA <span className="opacity-20 font-light">Discovery</span></span>
+          <span className="font-bold text-3xl tracking-tighter text-black">MA <span className="opacity-20 font-light">Discovery</span></span>
         </div>
-        {['game-box', 'game-wheel', 'game-speed'].includes(state) && (
+        {['game-box', 'game-wheel', 'game-speed', 'choice'].includes(state) && (
           <button 
-            onClick={() => setState('choice')}
-            className="flex items-center gap-2 text-sm font-semibold opacity-30 hover:opacity-100 transition-all duration-300"
+            onClick={resetToHero}
+            className="flex items-center gap-3 text-lg font-bold opacity-30 hover:opacity-100 transition-all duration-300 active:scale-90"
           >
-            <ArrowLeft className="w-4 h-4" /> Voltar
+            <ArrowLeft className="w-6 h-6" /> Início
           </button>
         )}
       </nav>
 
-      <div className="relative flex-1 flex flex-col items-center justify-center py-8 px-4">
+      <div className="relative flex-1 flex flex-col items-center justify-center py-10 px-6">
         
         {/* HERO STATE */}
         {state === 'hero' && (
           <div className="flex flex-col items-center text-center animate-fade-in max-w-5xl">
-            <div className="relative mb-16 animate-float">
-              <div className="relative w-[260px] h-[520px] md:w-[360px] md:h-[720px]">
+            <div className="relative mb-20 animate-float">
+              <div className="relative w-[300px] h-[600px] md:w-[450px] md:h-[900px]">
                 <Image 
                   src={iphoneImg?.imageUrl || ""} 
                   alt="iPhone Premium"
                   fill
-                  className="object-contain drop-shadow-2xl"
+                  className="object-contain drop-shadow-[0_35px_60px_rgba(0,0,0,0.15)]"
                   priority
                 />
               </div>
             </div>
-            <h1 className="text-6xl md:text-9xl font-bold tracking-tighter mb-8 leading-[0.85] text-black">
-              Experiência.<br/><span className="text-muted-foreground/30 font-light italic">Discovery.</span>
+            <h1 className="text-7xl md:text-[10rem] font-bold tracking-tighter mb-12 leading-[0.8] text-black">
+              Experiência.<br/><span className="text-muted-foreground/20 font-light italic">Discovery.</span>
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground/60 mb-16 font-medium max-w-2xl tracking-tight">
-              Desafie sua sorte e conquiste benefícios exclusivos MA Imports.
+            <p className="text-2xl md:text-4xl text-muted-foreground/50 mb-20 font-medium max-w-3xl tracking-tight leading-tight">
+              Toque para iniciar sua jornada e conquistar benefícios exclusivos.
             </p>
-            <GlassButton size="xl" onClick={() => setState('choice')} className="min-w-[300px] rounded-full shadow-2xl">
-              Iniciar Jornada <ChevronRight className="ml-2 w-6 h-6" />
+            <GlassButton size="xl" onClick={() => setState('choice')} className="h-28 min-w-[400px] rounded-full shadow-2xl text-3xl animate-pulse">
+              Começar <ChevronRight className="ml-3 w-8 h-8" />
             </GlassButton>
           </div>
         )}
@@ -141,8 +164,8 @@ export default function MADiscovery() {
         {/* CHOICE STATE */}
         {state === 'choice' && (
           <div className="w-full animate-fade-in max-w-6xl">
-            <h2 className="text-4xl md:text-6xl font-bold mb-20 text-center tracking-tighter text-black">Escolha seu Desafio.</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <h2 className="text-6xl md:text-8xl font-bold mb-24 text-center tracking-tighter text-black">Escolha seu Desafio.</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {[
                 { id: 'game-box', icon: Box, name: 'Caixas', desc: 'Sorte Pura.', color: 'from-zinc-50 to-white' },
                 { id: 'game-wheel', icon: RotateCcw, name: 'Roda Tech', desc: 'Gire e Ganhe.', color: 'from-zinc-50 to-white' },
@@ -152,17 +175,17 @@ export default function MADiscovery() {
                   key={game.id}
                   onClick={() => setState(game.id as any)}
                   className={cn(
-                    "relative p-14 rounded-[3rem] bg-gradient-to-br border border-black/5 flex flex-col items-center text-center group hover:scale-[1.02] active:scale-95 transition-all duration-500 shadow-sm hover:shadow-2xl overflow-hidden",
+                    "relative p-16 rounded-[4rem] bg-gradient-to-br border border-black/5 flex flex-col items-center text-center group hover:scale-[1.03] active:scale-95 transition-all duration-500 shadow-sm hover:shadow-2xl overflow-hidden",
                     game.color
                   )}
                 >
-                  <div className="w-24 h-24 rounded-3xl flex items-center justify-center mb-10 bg-white shadow-lg border border-black/5 group-hover:bg-black group-hover:text-white transition-all duration-500">
-                    <game.icon className="w-10 h-10 transition-transform duration-500 group-hover:rotate-12" />
+                  <div className="w-32 h-32 rounded-[2.5rem] flex items-center justify-center mb-12 bg-white shadow-xl border border-black/5 group-hover:bg-black group-hover:text-white transition-all duration-500">
+                    <game.icon className="w-14 h-14 transition-transform duration-500 group-hover:rotate-12" />
                   </div>
-                  <h3 className="text-3xl font-bold mb-4 tracking-tighter text-black">{game.name}</h3>
-                  <p className="text-lg text-muted-foreground/60 font-medium">{game.desc}</p>
-                  <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-10 transition-opacity">
-                    <ChevronRight className="w-12 h-12" />
+                  <h3 className="text-4xl font-bold mb-6 tracking-tighter text-black">{game.name}</h3>
+                  <p className="text-xl text-muted-foreground/60 font-medium">{game.desc}</p>
+                  <div className="absolute top-0 right-0 p-10 opacity-0 group-hover:opacity-10 transition-opacity">
+                    <ChevronRight className="w-16 h-16" />
                   </div>
                 </button>
               ))}
@@ -172,10 +195,10 @@ export default function MADiscovery() {
 
         {/* GAME: CAIXA PREMIADA */}
         {state === 'game-box' && (
-          <div className="flex flex-col items-center animate-fade-in w-full max-w-5xl">
-            <h2 className="text-5xl font-bold mb-4 tracking-tighter text-black">Caixa Premiada</h2>
-            <p className="text-xl text-muted-foreground/60 mb-20 font-medium">Sua intuição nunca falha.</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-full">
+          <div className="flex flex-col items-center animate-fade-in w-full max-w-6xl">
+            <h2 className="text-6xl font-bold mb-6 tracking-tighter text-black">Caixa Premiada</h2>
+            <p className="text-2xl text-muted-foreground/60 mb-24 font-medium">Toque em uma caixa para revelar seu prêmio.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-16 w-full">
               {[0, 1, 2].map((i) => (
                 <button 
                   key={i} 
@@ -184,20 +207,17 @@ export default function MADiscovery() {
                     finalizeGame('Caixa Premiada')
                   }}
                   className={cn(
-                    "relative h-[320px] bg-white rounded-[4rem] border border-black/5 cursor-pointer transition-all duration-500 hover:shadow-2xl hover:-translate-y-4 flex flex-col items-center justify-center group overflow-hidden",
+                    "relative h-[400px] bg-white rounded-[5rem] border border-black/5 cursor-pointer transition-all duration-500 hover:shadow-2xl hover:-translate-y-6 flex flex-col items-center justify-center group overflow-hidden active:scale-90",
                     selectedBox === i && "animate-shake bg-zinc-50 border-black/20"
                   )}
                 >
                   <div className="relative">
                     <Gift className={cn(
-                      "w-24 h-24 text-black transition-all duration-700",
-                      selectedBox === i ? "scale-125 rotate-12 opacity-100" : "opacity-10 group-hover:opacity-100 group-hover:scale-110"
+                      "w-32 h-32 text-black transition-all duration-700",
+                      selectedBox === i ? "scale-150 rotate-12 opacity-100" : "opacity-10 group-hover:opacity-100 group-hover:scale-125"
                     )} />
-                    <div className="absolute -top-4 -right-4 w-8 h-8 bg-zinc-100 rounded-full border border-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ChevronRight className="w-4 h-4" />
-                    </div>
                   </div>
-                  <div className="mt-8 text-xs font-bold uppercase tracking-[0.3em] opacity-20">Explorar</div>
+                  <div className="mt-12 text-sm font-black uppercase tracking-[0.4em] opacity-20">Escolher</div>
                 </button>
               ))}
             </div>
@@ -207,73 +227,72 @@ export default function MADiscovery() {
         {/* GAME: RODA TECH */}
         {state === 'game-wheel' && (
           <div className="flex flex-col items-center animate-fade-in w-full">
-            <h2 className="text-5xl font-bold mb-4 tracking-tighter text-black">Roda Tech</h2>
-            <p className="text-xl text-muted-foreground/60 mb-20 font-medium">Toque e sinta a sorte girar.</p>
+            <h2 className="text-6xl font-bold mb-6 tracking-tighter text-black">Roda Tech</h2>
+            <p className="text-2xl text-muted-foreground/60 mb-24 font-medium">Gire a roleta e descubra seu benefício.</p>
             
-            <div className="relative mb-20">
+            <div className="relative mb-24">
               {/* Pointer */}
-              <div className="absolute top-[-20px] left-1/2 -translate-x-1/2 z-30 drop-shadow-xl">
-                <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[30px] border-t-black" />
+              <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 z-30 drop-shadow-2xl">
+                <div className="w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-t-[50px] border-t-black" />
               </div>
 
               {/* Wheel */}
-              <div className="relative p-4 bg-white rounded-full shadow-2xl border-4 border-black/5">
+              <div className="relative p-6 bg-white rounded-full shadow-[0_50px_100px_rgba(0,0,0,0.1)] border-[8px] border-black/5">
                 <div 
-                  className="w-80 h-80 md:w-[500px] md:h-[500px] rounded-full bg-zinc-50 relative transition-transform duration-[4500ms] ease-[cubic-bezier(0.15,0,0.15,1)] flex items-center justify-center overflow-hidden border border-black/5 shadow-inner"
+                  className="w-[500px] h-[500px] md:w-[700px] md:h-[700px] rounded-full bg-zinc-50 relative transition-transform duration-[4500ms] ease-[cubic-bezier(0.15,0,0.15,1)] flex items-center justify-center overflow-hidden border-2 border-black/5"
                   style={{ transform: `rotate(${rotation}deg)` }}
                 >
-                  <div className="wheel-segment"></div>
-                  <div className="wheel-segment"></div>
-                  <div className="wheel-segment"></div>
-                  <div className="wheel-segment"></div>
+                  {[0, 1, 2, 3].map((_, i) => (
+                    <div key={i} className="wheel-segment" style={{ transform: `rotate(${i * 90}deg) skewY(-45deg)` }} />
+                  ))}
                   
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-                    <div className="w-full h-[1px] bg-black/20 rotate-45" />
-                    <div className="w-full h-[1px] bg-black/20 -rotate-45" />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
+                    <div className="w-full h-[1px] bg-black rotate-45" />
+                    <div className="w-full h-[1px] bg-black -rotate-45" />
                   </div>
 
-                  <div className="absolute z-20 w-24 h-24 md:w-32 md:h-32 bg-white rounded-full shadow-2xl border-4 border-black/5 flex items-center justify-center">
-                    <Smartphone className="w-10 h-10 md:w-12 md:h-12 text-black" />
+                  <div className="absolute z-20 w-40 h-40 bg-white rounded-full shadow-2xl border-[10px] border-zinc-50 flex items-center justify-center">
+                    <Smartphone className="w-16 h-16 text-black" />
                   </div>
                 </div>
               </div>
             </div>
 
-            <GlassButton size="xl" onClick={spinWheel} disabled={isSpinning} className="min-w-[280px] rounded-full shadow-xl">
-              {isSpinning ? 'Sorteando...' : 'Girar Agora'}
+            <GlassButton size="xl" onClick={spinWheel} disabled={isSpinning} className="h-28 min-w-[400px] rounded-full shadow-2xl text-3xl">
+              {isSpinning ? 'Sorteando...' : 'Girar Roleta'}
             </GlassButton>
           </div>
         )}
 
         {/* GAME: TOQUE RÁPIDO */}
         {state === 'game-speed' && (
-          <div className="flex flex-col items-center w-full animate-fade-in max-w-5xl">
+          <div className="flex flex-col items-center w-full animate-fade-in max-w-6xl">
             {!speedActive && speedScore === 0 ? (
               <div className="text-center">
-                <h2 className="text-5xl font-bold mb-4 tracking-tighter text-black">Toque Rápido</h2>
-                <p className="text-xl text-muted-foreground/60 mb-16 font-medium max-w-md mx-auto">Sua agilidade define seu benefício. Toque nos ícones que surgirem.</p>
-                <GlassButton size="xl" onClick={startSpeedGame} className="min-w-[280px] rounded-full">Começar Desafio</GlassButton>
+                <h2 className="text-6xl font-bold mb-6 tracking-tighter text-black">Toque Rápido</h2>
+                <p className="text-2xl text-muted-foreground/60 mb-20 font-medium max-w-2xl mx-auto">Sua agilidade define seu benefício. Toque nos ícones o mais rápido possível.</p>
+                <GlassButton size="xl" onClick={startSpeedGame} className="h-28 min-w-[350px] rounded-full text-3xl">Começar Desafio</GlassButton>
               </div>
             ) : (
               <div className="w-full flex flex-col items-center">
-                <div className="flex justify-between w-full mb-10 px-8">
+                <div className="flex justify-between w-full mb-16 px-12">
                   <div className="flex flex-col">
-                    <span className="text-xs uppercase tracking-[0.2em] opacity-30 font-bold mb-1">Tempo</span>
-                    <div className="text-4xl font-bold tabular-nums">{timeLeft}s</div>
+                    <span className="text-sm uppercase tracking-[0.3em] opacity-30 font-black mb-2">Tempo Restante</span>
+                    <div className="text-6xl font-bold tabular-nums">{timeLeft}s</div>
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="text-xs uppercase tracking-[0.2em] opacity-30 font-bold mb-1">Score</span>
-                    <div className="text-4xl font-bold tabular-nums">{speedScore}</div>
+                    <span className="text-sm uppercase tracking-[0.3em] opacity-30 font-black mb-2">Pontuação</span>
+                    <div className="text-6xl font-bold tabular-nums">{speedScore}</div>
                   </div>
                 </div>
 
-                <div className="relative w-full aspect-[4/3] md:aspect-video bg-white border border-black/5 rounded-[4rem] overflow-hidden shadow-2xl cursor-crosshair">
+                <div className="relative w-full aspect-[4/3] md:aspect-video bg-white border-2 border-black/5 rounded-[5rem] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.05)]">
                   <button
                     onClick={handleTargetHit}
-                    className="absolute w-24 h-24 bg-black text-white rounded-3xl shadow-2xl flex items-center justify-center transition-all duration-75 active:scale-125 scale-in animate-pulse"
+                    className="absolute w-32 h-32 bg-black text-white rounded-[2.5rem] shadow-2xl flex items-center justify-center transition-all duration-75 active:scale-125 animate-pulse"
                     style={{ top: targetPos.top, left: targetPos.left }}
                   >
-                    <Smartphone className="w-10 h-10" />
+                    <Smartphone className="w-16 h-16" />
                   </button>
                 </div>
               </div>
@@ -283,41 +302,41 @@ export default function MADiscovery() {
 
         {/* RESULT STATE */}
         {state === 'result' && (
-          <div className="flex flex-col items-center text-center px-6 animate-scale-in max-w-4xl">
-            <div className="w-28 h-28 rounded-[2.5rem] bg-black text-white flex items-center justify-center mb-16 shadow-2xl animate-bounce">
-              <Trophy className="w-14 h-14" />
+          <div className="flex flex-col items-center text-center px-8 animate-scale-in max-w-5xl">
+            <div className="w-40 h-40 rounded-[3rem] bg-black text-white flex items-center justify-center mb-20 shadow-[0_30px_60px_rgba(0,0,0,0.2)] animate-bounce">
+              <Trophy className="w-20 h-20" />
             </div>
-            <h2 className="text-6xl md:text-8xl font-bold mb-8 tracking-tighter text-black">Incrível.</h2>
-            <p className="text-2xl font-medium opacity-30 mb-20 tracking-tight">Sua conquista exclusiva é:</p>
+            <h2 className="text-8xl md:text-[10rem] font-bold mb-10 tracking-tighter text-black leading-none">Incrível.</h2>
+            <p className="text-3xl font-medium opacity-30 mb-24 tracking-tight">Você conquistou:</p>
             
-            <div className="relative w-full max-w-2xl bg-white border border-black/5 p-16 rounded-[4rem] shadow-2xl mb-20 overflow-hidden">
-               <div className="absolute top-0 right-0 p-10 opacity-5">
-                 <Star className="w-40 h-40 fill-black" />
+            <div className="relative w-full bg-white border border-black/5 p-20 rounded-[6rem] shadow-[0_50px_100px_rgba(0,0,0,0.1)] mb-24 overflow-hidden">
+               <div className="absolute top-0 right-0 p-12 opacity-[0.03]">
+                 <Star className="w-60 h-60 fill-black" />
                </div>
-               <h3 className="text-4xl md:text-6xl font-bold tracking-tighter leading-tight relative z-10">{reward}</h3>
+               <h3 className="text-5xl md:text-8xl font-bold tracking-tighter leading-tight relative z-10 text-black">{reward}</h3>
             </div>
 
-            <GlassButton size="xl" onClick={() => setState('evaluation')} className="min-w-[320px] rounded-full">
-              Finalizar <ChevronRight className="ml-2 w-6 h-6" />
+            <GlassButton size="xl" onClick={() => setState('evaluation')} className="h-28 min-w-[450px] rounded-full text-3xl">
+              Continuar <ChevronRight className="ml-3 w-8 h-8" />
             </GlassButton>
           </div>
         )}
 
         {/* EVALUATION STATE */}
         {state === 'evaluation' && (
-          <div className="flex flex-col items-center text-center px-6 animate-fade-in max-w-3xl">
-            <h2 className="text-6xl md:text-7xl font-bold mb-10 tracking-tighter leading-[0.9] text-black">Como foi<br/><span className="opacity-20 italic font-light">sua descoberta?</span></h2>
-            <p className="text-xl text-muted-foreground/60 mb-20 font-medium leading-relaxed">
+          <div className="flex flex-col items-center text-center px-8 animate-fade-in max-w-4xl">
+            <h2 className="text-7xl md:text-9xl font-bold mb-12 tracking-tighter leading-[0.85] text-black">Como foi<br/><span className="opacity-20 italic font-light">sua descoberta?</span></h2>
+            <p className="text-2xl text-muted-foreground/50 mb-24 font-medium leading-relaxed max-w-2xl">
               Sua avaliação ajuda a elevar o padrão MA Imports.
             </p>
             
-            <div className="flex flex-col gap-6 w-full max-w-lg">
-              <GlassButton variant="primary" size="xl" className="w-full h-24 text-2xl rounded-3xl shadow-xl">
-                <Star className="w-8 h-8 fill-current" /> Avaliar no Google
+            <div className="flex flex-col gap-10 w-full max-w-xl">
+              <GlassButton variant="primary" size="xl" className="w-full h-32 text-3xl rounded-[3rem] shadow-2xl">
+                <Star className="w-10 h-10 fill-current" /> Avaliar no Google
               </GlassButton>
               <button 
                 onClick={() => setState('final')}
-                className="text-lg font-bold opacity-30 hover:opacity-100 transition-opacity py-6 tracking-tight"
+                className="text-2xl font-bold opacity-30 hover:opacity-100 transition-opacity py-8 tracking-tight active:scale-95"
               >
                 Pular Avaliação
               </button>
@@ -327,31 +346,31 @@ export default function MADiscovery() {
 
         {/* FINAL STATE */}
         {state === 'final' && (
-          <div className="flex flex-col items-center text-center px-6 animate-fade-in max-w-4xl">
-            <div className="bg-white p-14 rounded-[5rem] mb-20 shadow-2xl border border-black/5 group">
-              <QrCode className="w-72 h-72 text-black transition-transform duration-500 group-hover:scale-95" />
+          <div className="flex flex-col items-center text-center px-8 animate-fade-in max-w-5xl">
+            <div className="bg-white p-20 rounded-[7rem] mb-24 shadow-[0_50px_100px_rgba(0,0,0,0.05)] border border-black/5">
+              <QrCode className="w-96 h-96 text-black opacity-90" />
             </div>
             
-            <h2 className="text-6xl font-bold mb-8 tracking-tighter text-black">Catálogo Completo.</h2>
-            <p className="text-xl text-muted-foreground/60 mb-20 font-medium tracking-tight">Escaneie e descubra todo o ecossistema Apple.</p>
+            <h2 className="text-7xl font-bold mb-10 tracking-tighter text-black">Explore o Catálogo.</h2>
+            <p className="text-2xl text-muted-foreground/60 mb-24 font-medium tracking-tight">Escaneie o código acima e conheça todo o ecossistema Apple.</p>
 
-            <div className="flex flex-col gap-6 w-full max-w-lg">
-              <GlassButton className="bg-[#25D366] hover:bg-[#20ba59] border-none h-24 text-2xl rounded-[2.5rem] text-white shadow-2xl">
-                <MessageCircle className="w-8 h-8 fill-current" /> WhatsApp Direto
+            <div className="flex flex-col gap-8 w-full max-w-xl">
+              <GlassButton className="bg-[#25D366] hover:bg-[#20ba59] border-none h-32 text-3xl rounded-[3.5rem] text-white shadow-2xl">
+                <MessageCircle className="w-10 h-10 fill-current" /> WhatsApp Direto
               </GlassButton>
               <button 
                 onClick={resetToHero}
-                className="text-lg font-bold opacity-30 hover:opacity-100 transition-opacity py-8 tracking-tighter"
+                className="text-2xl font-black opacity-30 hover:opacity-100 transition-opacity py-10 tracking-[0.2em] uppercase active:scale-95"
               >
-                ENCERRAR SESSÃO
+                Encerrar Sessão
               </button>
             </div>
           </div>
         )}
       </div>
 
-      <footer className="p-12 text-center text-[10px] tracking-[0.5em] font-black uppercase opacity-10 shrink-0 text-black">
-        MA IMPORTS — PREMIUM TECHNOLOGY
+      <footer className="p-16 text-center text-sm tracking-[0.6em] font-black uppercase opacity-10 shrink-0 text-black">
+        MA IMPORTS — PREMIUM TECHNOLOGY EXPERIENCE
       </footer>
     </main>
   )
