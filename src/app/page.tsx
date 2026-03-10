@@ -1,17 +1,27 @@
+
 "use client"
 
 import * as React from "react"
 import Image from "next/image"
 import { 
   ChevronRight, Star, Smartphone, Box, RotateCcw, Zap, 
-  QrCode, MessageCircle, Trophy, ArrowLeft, Gift, TouchpadIcon
+  QrCode, MessageCircle, Trophy, ArrowLeft, Gift, 
+  Watch, Laptop, Headphones, Tablet, Speaker, Monitor
 } from "lucide-react"
 import { GlassButton } from "@/components/ma/GlassButton"
 import { CouponRewards, saveGameSession } from "@/lib/coupon-service"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { cn } from "@/lib/utils"
 
-type AppState = 'hero' | 'choice' | 'game-box' | 'game-wheel' | 'game-speed' | 'result' | 'evaluation' | 'final'
+type AppState = 'hero' | 'choice' | 'game-box' | 'game-wheel' | 'game-speed' | 'game-memory' | 'result' | 'evaluation' | 'final'
+
+interface MemoryCard {
+  id: number
+  icon: any
+  name: string
+  isFlipped: boolean
+  isMatched: boolean
+}
 
 export default function MADiscovery() {
   const [state, setState] = React.useState<AppState>('hero')
@@ -26,6 +36,10 @@ export default function MADiscovery() {
   const [targetPos, setTargetPos] = React.useState({ top: '50%', left: '50%' })
   const [selectedBox, setSelectedBox] = React.useState<number | null>(null)
 
+  // Memory Game State
+  const [cards, setCards] = React.useState<MemoryCard[]>([])
+  const [flippedCards, setFlippedCards] = React.useState<number[]>([])
+
   const resetToHero = React.useCallback(() => {
     setState('hero')
     setIsSpinning(false)
@@ -33,6 +47,8 @@ export default function MADiscovery() {
     setSpeedScore(0)
     setSelectedBox(null)
     setReward(null)
+    setCards([])
+    setFlippedCards([])
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
 
@@ -48,7 +64,7 @@ export default function MADiscovery() {
       clearTimeout(timer);
     };
 
-    window.addEventListener('touchstart', handleInteraction);
+    window.addEventListener('touchstart', handleInteraction, { passive: true });
     window.addEventListener('mousedown', handleInteraction);
 
     return () => {
@@ -66,6 +82,64 @@ export default function MADiscovery() {
       setState('result')
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }, 1000)
+  }
+
+  // --- Memory Game Logic ---
+  const initMemoryGame = () => {
+    const icons = [
+      { icon: Smartphone, name: 'iPhone' },
+      { icon: Watch, name: 'Watch' },
+      { icon: Laptop, name: 'Mac' },
+      { icon: Headphones, name: 'AirPods' },
+      { icon: Tablet, name: 'iPad' },
+      { icon: Speaker, name: 'HomePod' },
+    ]
+    const gameCards: MemoryCard[] = [...icons, ...icons]
+      .sort(() => Math.random() - 0.5)
+      .map((item, index) => ({
+        id: index,
+        ...item,
+        isFlipped: false,
+        isMatched: false,
+      }))
+    setCards(gameCards)
+    setState('game-memory')
+  }
+
+  const handleCardClick = (id: number) => {
+    if (flippedCards.length === 2 || cards[id].isFlipped || cards[id].isMatched) return
+
+    const newCards = [...cards]
+    newCards[id].isFlipped = true
+    setCards(newCards)
+
+    const newFlipped = [...flippedCards, id]
+    setFlippedCards(newFlipped)
+
+    if (newFlipped.length === 2) {
+      const [firstId, secondId] = newFlipped
+      if (cards[firstId].name === cards[secondId].name) {
+        setTimeout(() => {
+          const matchedCards = [...newCards]
+          matchedCards[firstId].isMatched = true
+          matchedCards[secondId].isMatched = true
+          setCards(matchedCards)
+          setFlippedCards([])
+          
+          if (matchedCards.every(c => c.isMatched)) {
+            finalizeGame('Jogo da Memória')
+          }
+        }, 500)
+      } else {
+        setTimeout(() => {
+          const resetCards = [...newCards]
+          resetCards[firstId].isFlipped = false
+          resetCards[secondId].isFlipped = false
+          setCards(resetCards)
+          setFlippedCards([])
+        }, 1000)
+      }
+    }
   }
 
   // --- Roda Tech Logic ---
@@ -123,7 +197,7 @@ export default function MADiscovery() {
           </div>
           <span className="font-bold text-3xl tracking-tighter text-black">MA <span className="opacity-20 font-light">Discovery</span></span>
         </div>
-        {['game-box', 'game-wheel', 'game-speed', 'choice'].includes(state) && (
+        {state !== 'hero' && (
           <button 
             onClick={resetToHero}
             className="flex items-center gap-3 text-lg font-bold opacity-30 hover:opacity-100 transition-all duration-300 active:scale-90"
@@ -165,27 +239,61 @@ export default function MADiscovery() {
         {state === 'choice' && (
           <div className="w-full animate-fade-in max-w-6xl">
             <h2 className="text-6xl md:text-8xl font-bold mb-24 text-center tracking-tighter text-black">Escolha seu Desafio.</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
                 { id: 'game-box', icon: Box, name: 'Caixas', desc: 'Sorte Pura.', color: 'from-zinc-50 to-white' },
                 { id: 'game-wheel', icon: RotateCcw, name: 'Roda Tech', desc: 'Gire e Ganhe.', color: 'from-zinc-50 to-white' },
                 { id: 'game-speed', icon: Zap, name: 'Reflexo', desc: 'Toque Rápido.', color: 'from-zinc-50 to-white' },
+                { id: 'game-memory', icon: Monitor, name: 'Memória', desc: 'Foco Total.', color: 'from-zinc-50 to-white', action: initMemoryGame },
               ].map((game) => (
                 <button
                   key={game.id}
-                  onClick={() => setState(game.id as any)}
+                  onClick={() => game.action ? game.action() : setState(game.id as any)}
                   className={cn(
-                    "relative p-16 rounded-[4rem] bg-gradient-to-br border border-black/5 flex flex-col items-center text-center group hover:scale-[1.03] active:scale-95 transition-all duration-500 shadow-sm hover:shadow-2xl overflow-hidden",
+                    "relative p-12 rounded-[3.5rem] bg-gradient-to-br border border-black/5 flex flex-col items-center text-center group hover:scale-[1.03] active:scale-95 transition-all duration-500 shadow-sm hover:shadow-2xl overflow-hidden",
                     game.color
                   )}
                 >
-                  <div className="w-32 h-32 rounded-[2.5rem] flex items-center justify-center mb-12 bg-white shadow-xl border border-black/5 group-hover:bg-black group-hover:text-white transition-all duration-500">
-                    <game.icon className="w-14 h-14 transition-transform duration-500 group-hover:rotate-12" />
+                  <div className="w-24 h-24 rounded-[2rem] flex items-center justify-center mb-10 bg-white shadow-xl border border-black/5 group-hover:bg-black group-hover:text-white transition-all duration-500">
+                    <game.icon className="w-10 h-10 transition-transform duration-500 group-hover:rotate-12" />
                   </div>
-                  <h3 className="text-4xl font-bold mb-6 tracking-tighter text-black">{game.name}</h3>
-                  <p className="text-xl text-muted-foreground/60 font-medium">{game.desc}</p>
-                  <div className="absolute top-0 right-0 p-10 opacity-0 group-hover:opacity-10 transition-opacity">
-                    <ChevronRight className="w-16 h-16" />
+                  <h3 className="text-3xl font-bold mb-4 tracking-tighter text-black">{game.name}</h3>
+                  <p className="text-lg text-muted-foreground/60 font-medium">{game.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* GAME: MEMORY */}
+        {state === 'game-memory' && (
+          <div className="flex flex-col items-center animate-fade-in w-full max-w-5xl">
+            <h2 className="text-6xl font-bold mb-6 tracking-tighter text-black">Jogo da Memória</h2>
+            <p className="text-2xl text-muted-foreground/60 mb-16 font-medium">Combine os ícones dos produtos Apple.</p>
+            
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-6 w-full px-4">
+              {cards.map((card) => (
+                <button
+                  key={card.id}
+                  onClick={() => handleCardClick(card.id)}
+                  className={cn(
+                    "relative h-[200px] md:h-[250px] rounded-[3rem] transition-all duration-500 perspective-1000",
+                    (card.isFlipped || card.isMatched) ? "rotate-y-180" : ""
+                  )}
+                >
+                  <div className={cn(
+                    "absolute inset-0 w-full h-full rounded-[3rem] transition-all duration-500 preserve-3d flex items-center justify-center shadow-sm",
+                    (card.isFlipped || card.isMatched) 
+                      ? "bg-white border-2 border-black/10" 
+                      : "bg-zinc-100 border border-black/5 hover:bg-zinc-200"
+                  )}>
+                    {(card.isFlipped || card.isMatched) ? (
+                      <card.icon className="w-16 h-16 text-black" />
+                    ) : (
+                      <div className="w-12 h-12 bg-black/5 rounded-full flex items-center justify-center">
+                        <Smartphone className="w-6 h-6 text-black/20" />
+                      </div>
+                    )}
                   </div>
                 </button>
               ))}
@@ -231,12 +339,9 @@ export default function MADiscovery() {
             <p className="text-2xl text-muted-foreground/60 mb-24 font-medium">Gire a roleta e descubra seu benefício.</p>
             
             <div className="relative mb-24">
-              {/* Pointer */}
               <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 z-30 drop-shadow-2xl">
                 <div className="w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-t-[50px] border-t-black" />
               </div>
-
-              {/* Wheel */}
               <div className="relative p-6 bg-white rounded-full shadow-[0_50px_100px_rgba(0,0,0,0.1)] border-[8px] border-black/5">
                 <div 
                   className="w-[500px] h-[500px] md:w-[700px] md:h-[700px] rounded-full bg-zinc-50 relative transition-transform duration-[4500ms] ease-[cubic-bezier(0.15,0,0.15,1)] flex items-center justify-center overflow-hidden border-2 border-black/5"
@@ -245,19 +350,12 @@ export default function MADiscovery() {
                   {[0, 1, 2, 3].map((_, i) => (
                     <div key={i} className="wheel-segment" style={{ transform: `rotate(${i * 90}deg) skewY(-45deg)` }} />
                   ))}
-                  
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-                    <div className="w-full h-[1px] bg-black rotate-45" />
-                    <div className="w-full h-[1px] bg-black -rotate-45" />
-                  </div>
-
                   <div className="absolute z-20 w-40 h-40 bg-white rounded-full shadow-2xl border-[10px] border-zinc-50 flex items-center justify-center">
                     <Smartphone className="w-16 h-16 text-black" />
                   </div>
                 </div>
               </div>
             </div>
-
             <GlassButton size="xl" onClick={spinWheel} disabled={isSpinning} className="h-28 min-w-[400px] rounded-full shadow-2xl text-3xl">
               {isSpinning ? 'Sorteando...' : 'Girar Roleta'}
             </GlassButton>
@@ -285,7 +383,6 @@ export default function MADiscovery() {
                     <div className="text-6xl font-bold tabular-nums">{speedScore}</div>
                   </div>
                 </div>
-
                 <div className="relative w-full aspect-[4/3] md:aspect-video bg-white border-2 border-black/5 rounded-[5rem] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.05)]">
                   <button
                     onClick={handleTargetHit}
@@ -308,14 +405,9 @@ export default function MADiscovery() {
             </div>
             <h2 className="text-8xl md:text-[10rem] font-bold mb-10 tracking-tighter text-black leading-none">Incrível.</h2>
             <p className="text-3xl font-medium opacity-30 mb-24 tracking-tight">Você conquistou:</p>
-            
             <div className="relative w-full bg-white border border-black/5 p-20 rounded-[6rem] shadow-[0_50px_100px_rgba(0,0,0,0.1)] mb-24 overflow-hidden">
-               <div className="absolute top-0 right-0 p-12 opacity-[0.03]">
-                 <Star className="w-60 h-60 fill-black" />
-               </div>
                <h3 className="text-5xl md:text-8xl font-bold tracking-tighter leading-tight relative z-10 text-black">{reward}</h3>
             </div>
-
             <GlassButton size="xl" onClick={() => setState('evaluation')} className="h-28 min-w-[450px] rounded-full text-3xl">
               Continuar <ChevronRight className="ml-3 w-8 h-8" />
             </GlassButton>
@@ -329,15 +421,11 @@ export default function MADiscovery() {
             <p className="text-2xl text-muted-foreground/50 mb-24 font-medium leading-relaxed max-w-2xl">
               Sua avaliação ajuda a elevar o padrão MA Imports.
             </p>
-            
             <div className="flex flex-col gap-10 w-full max-w-xl">
               <GlassButton variant="primary" size="xl" className="w-full h-32 text-3xl rounded-[3rem] shadow-2xl">
                 <Star className="w-10 h-10 fill-current" /> Avaliar no Google
               </GlassButton>
-              <button 
-                onClick={() => setState('final')}
-                className="text-2xl font-bold opacity-30 hover:opacity-100 transition-opacity py-8 tracking-tight active:scale-95"
-              >
+              <button onClick={() => setState('final')} className="text-2xl font-bold opacity-30 hover:opacity-100 transition-opacity py-8 tracking-tight active:scale-95">
                 Pular Avaliação
               </button>
             </div>
@@ -350,18 +438,13 @@ export default function MADiscovery() {
             <div className="bg-white p-20 rounded-[7rem] mb-24 shadow-[0_50px_100px_rgba(0,0,0,0.05)] border border-black/5">
               <QrCode className="w-96 h-96 text-black opacity-90" />
             </div>
-            
             <h2 className="text-7xl font-bold mb-10 tracking-tighter text-black">Explore o Catálogo.</h2>
             <p className="text-2xl text-muted-foreground/60 mb-24 font-medium tracking-tight">Escaneie o código acima e conheça todo o ecossistema Apple.</p>
-
             <div className="flex flex-col gap-8 w-full max-w-xl">
               <GlassButton className="bg-[#25D366] hover:bg-[#20ba59] border-none h-32 text-3xl rounded-[3.5rem] text-white shadow-2xl">
                 <MessageCircle className="w-10 h-10 fill-current" /> WhatsApp Direto
               </GlassButton>
-              <button 
-                onClick={resetToHero}
-                className="text-2xl font-black opacity-30 hover:opacity-100 transition-opacity py-10 tracking-[0.2em] uppercase active:scale-95"
-              >
+              <button onClick={resetToHero} className="text-2xl font-black opacity-30 hover:opacity-100 transition-opacity py-10 tracking-[0.2em] uppercase active:scale-95">
                 Encerrar Sessão
               </button>
             </div>
