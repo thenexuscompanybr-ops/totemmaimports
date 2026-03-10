@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
 
 type AppState = 'hero' | 'choice' | 'game-box' | 'game-wheel' | 'game-speed' | 'game-memory' | 'result' | 'google-incentive' | 'qr-code'
-type SpinState = 'idle' | 'spinning' | 'stopping'
+type SpinState = 'idle' | 'spinning' | 'stopping' | 'dragging'
 
 export default function TotemExperience() {
   const [state, setState] = React.useState<AppState>('hero')
@@ -26,6 +26,12 @@ export default function TotemExperience() {
   const [rotation, setRotation] = React.useState(0)
   const [spinSpeed, setSpinSpeed] = React.useState([1.5])
   const wheelRef = React.useRef<HTMLDivElement>(null)
+  
+  // Interaction Refs
+  const dragStartAngle = React.useRef(0)
+  const lastAngle = React.useRef(0)
+  const lastTime = React.useRef(0)
+  const velocity = React.useRef(0)
 
   const [speedScore, setSpeedScore] = React.useState(0)
   const [speedActive, setSpeedActive] = React.useState(false)
@@ -83,16 +89,67 @@ export default function TotemExperience() {
     }, 800)
   }
 
-  // Improved Wheel Logic with Interaction
+  // --- INTERACTIVE WHEEL LOGIC ---
+  
+  const getPointerAngle = (e: React.PointerEvent | PointerEvent) => {
+    if (!wheelRef.current) return 0
+    const rect = wheelRef.current.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI)
+    return angle
+  }
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (spinPhase !== 'idle') return
+    setSpinPhase('dragging')
+    const angle = getPointerAngle(e)
+    dragStartAngle.current = angle - rotation
+    lastAngle.current = angle
+    lastTime.current = Date.now()
+    velocity.current = 0
+  }
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (spinPhase !== 'dragging') return
+    const currentAngle = getPointerAngle(e)
+    const newRotation = currentAngle - dragStartAngle.current
+    
+    // Calculate angular velocity
+    const now = Date.now()
+    const dt = now - lastTime.current
+    if (dt > 0) {
+      const da = currentAngle - lastAngle.current
+      velocity.current = da / dt
+    }
+    
+    setRotation(newRotation)
+    lastAngle.current = currentAngle
+    lastTime.current = now
+  }
+
+  const handlePointerUp = () => {
+    if (spinPhase !== 'dragging') return
+    
+    // If flick velocity is high enough, start spinning
+    if (Math.abs(velocity.current) > 0.5) {
+      const speed = Math.min(Math.max(Math.abs(velocity.current) * 2, 0.5), 4)
+      setSpinSpeed([speed])
+      startSpinning()
+    } else {
+      setSpinPhase('idle')
+    }
+  }
+
   const startSpinning = () => {
     setSpinPhase('spinning')
-    setRotation(0)
+    // Reset rotation to a manageable number if it got huge during drag
+    setRotation(prev => prev % 360)
   }
 
   const stopSpinning = () => {
     if (!wheelRef.current) return
     
-    // Captura a rotação atual para evitar saltos visuais (glitch)
     const computedStyle = window.getComputedStyle(wheelRef.current)
     const matrix = new DOMMatrixReadOnly(computedStyle.transform)
     const currentAngle = Math.atan2(matrix.b, matrix.a) * (180 / Math.PI)
@@ -103,7 +160,6 @@ export default function TotemExperience() {
     const selectedPrize = CouponRewards[prizeIndex]
     const sliceAngle = 360 / CouponRewards.length
     
-    // Calcula o destino final (5 voltas completas + compensação do prêmio)
     const targetSliceRotation = 360 - (prizeIndex * sliceAngle)
     const finalRotation = currentAngle + (360 * 5) + targetSliceRotation - (currentAngle % 360)
     
@@ -113,6 +169,8 @@ export default function TotemExperience() {
       finalizeGame('Roda Tech', selectedPrize)
     }, 3200)
   }
+
+  // --- GAME LOGIC END ---
 
   // Speed Game Logic
   const startSpeedGame = () => {
@@ -299,12 +357,17 @@ export default function TotemExperience() {
               <div className="p-6 bg-white/5 rounded-full border border-white/10 backdrop-blur-3xl relative">
                 <div 
                   ref={wheelRef}
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerLeave={handlePointerUp}
                   className={cn(
-                    "w-[400px] h-[400px] md:w-[500px] md:h-[500px] rounded-full bg-white/5 relative flex items-center justify-center overflow-hidden border-4 border-[#C5A059]/20 transition-transform duration-[3200ms] ease-[cubic-bezier(0.15,0,0.1,1)]",
+                    "w-[400px] h-[400px] md:w-[500px] md:h-[500px] rounded-full bg-white/5 relative flex items-center justify-center overflow-hidden border-4 border-[#C5A059]/20 cursor-grab active:cursor-grabbing",
                     spinPhase === 'spinning' && "animate-[spin_var(--spin-dur)_linear_infinite]"
                   )}
                   style={{ 
-                    transform: spinPhase === 'stopping' ? `rotate(${rotation}deg)` : undefined,
+                    transform: (spinPhase === 'stopping' || spinPhase === 'idle' || spinPhase === 'dragging') ? `rotate(${rotation}deg)` : undefined,
+                    transition: spinPhase === 'stopping' ? 'transform 3.2s cubic-bezier(0.15, 0, 0.1, 1)' : 'none',
                     '--spin-dur': `${2 / spinSpeed[0]}s`
                   } as React.CSSProperties}
                 >
@@ -325,7 +388,7 @@ export default function TotemExperience() {
                        </div>
                     </div>
                   ))}
-                  <div className="absolute z-30 w-24 h-24 bg-[#001D3D] rounded-full shadow-[0_0_80px_rgba(0,0,0,0.8)] border-4 border-[#C5A059] flex items-center justify-center">
+                  <div className="absolute z-30 w-24 h-24 bg-[#001D3D] rounded-full shadow-[0_0_80px_rgba(0,0,0,0.8)] border-4 border-[#C5A059] flex items-center justify-center pointer-events-none">
                     <div className="relative w-12 h-12">
                       <Image src={maLogo} alt="MA Logo" fill className="object-contain" />
                     </div>
@@ -335,9 +398,15 @@ export default function TotemExperience() {
             </div>
 
             <div className="w-full max-w-md space-y-8">
+              <div className="text-center mb-4">
+                <p className="text-[#C5A059] font-black uppercase text-xs tracking-[0.2em] animate-pulse">
+                  Deslize para girar ou use os controles abaixo
+                </p>
+              </div>
+              
               <div className="space-y-4">
                 <div className="flex justify-between items-center text-xs font-black uppercase tracking-[0.2em] text-white/30">
-                  <span>Intensidade do Giro</span>
+                  <span>Velocidade Manual</span>
                   <span className="text-[#C5A059]">{spinSpeed[0].toFixed(1)}x</span>
                 </div>
                 <Slider 
@@ -352,7 +421,7 @@ export default function TotemExperience() {
               </div>
 
               <div className="pt-4">
-                {spinPhase === 'idle' && (
+                {(spinPhase === 'idle' || spinPhase === 'dragging') && (
                   <GlassButton variant="gold" onClick={startSpinning} className="w-full">
                     GIRAR AGORA
                   </GlassButton>
