@@ -488,15 +488,19 @@ export default function TotemExperience() {
         )}
 
         {state === 'google-incentive' && (
-          <div className="flex flex-col items-center text-center animate-reveal">
-            <div className="w-32 h-32 rounded-[32px] bg-white/5 border border-[#C5A059]/30 flex items-center justify-center mb-12 shadow-2xl backdrop-blur-3xl">
-              <Star className="w-16 h-16 text-[#C5A059]" />
+          <div className="flex flex-col items-center text-center animate-reveal max-w-4xl px-4">
+            <div className="flex gap-2 mb-10">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Star key={i} className="w-12 h-12 text-[#C5A059] fill-[#C5A059]" />
+              ))}
             </div>
-            <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-tighter text-white uppercase">Sua opinião é ouro</h2>
-            <p className="text-xl text-white/40 font-medium mb-16 max-w-2xl leading-relaxed">
-              Avalie nossa loja no Google e ajude a MA Imports a crescer.
+            <h2 className="text-[clamp(2.5rem,8vw,5.5rem)] font-black mb-10 tracking-tighter text-white uppercase leading-tight">
+              Avalie sua <br className="hidden md:block" /> experiência
+            </h2>
+            <p className="text-2xl md:text-3xl text-white/40 font-medium mb-20 max-w-2xl leading-relaxed">
+              Sua avaliação ajuda a MA Imports a oferecer serviços cada vez melhores.
             </p>
-            <GlassButton variant="gold" onClick={() => setState('qr-code')} className="w-full max-w-lg">
+            <GlassButton variant="gold" onClick={() => setState('qr-code')} className="w-full max-w-xl">
               AVALIAR AGORA
             </GlassButton>
           </div>
