@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -13,13 +14,14 @@ import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { cn } from "@/lib/utils"
 
 type AppState = 'hero' | 'choice' | 'game-box' | 'game-wheel' | 'game-speed' | 'game-memory' | 'result' | 'google-incentive' | 'qr-code'
+type SpinState = 'idle' | 'spinning' | 'stopping'
 
 export default function TotemExperience() {
   const [state, setState] = React.useState<AppState>('hero')
   const [reward, setReward] = React.useState<string | null>(null)
   
   // Game States
-  const [isSpinning, setIsSpinning] = React.useState(false)
+  const [spinPhase, setSpinPhase] = React.useState<SpinState>('idle')
   const [rotation, setRotation] = React.useState(0)
   const [speedScore, setSpeedScore] = React.useState(0)
   const [speedActive, setSpeedActive] = React.useState(false)
@@ -35,7 +37,8 @@ export default function TotemExperience() {
 
   const resetToHero = React.useCallback(() => {
     setState('hero')
-    setIsSpinning(false)
+    setSpinPhase('idle')
+    setRotation(0)
     setSpeedActive(false)
     setSpeedScore(0)
     setSelectedBox(null)
@@ -75,17 +78,22 @@ export default function TotemExperience() {
     }, 800)
   }
 
-  // Wheel Logic
-  const spinWheel = () => {
-    if (isSpinning) return
-    setIsSpinning(true)
-    const extraDegrees = 1800 + Math.random() * 360
-    const newRotation = rotation + extraDegrees
-    setRotation(newRotation)
+  // Improved Wheel Logic
+  const startSpinning = () => {
+    setSpinPhase('spinning')
+    setRotation(r => r + 360) // Just to trigger initial state if needed
+  }
+
+  const stopSpinning = () => {
+    setSpinPhase('stopping')
+    // Randomize final stop position (between 1440 and 1800 additional degrees for smooth slow down)
+    const extraDegrees = 1080 + Math.random() * 360
+    const finalRotation = rotation + extraDegrees
+    setRotation(finalRotation)
+    
     setTimeout(() => {
       finalizeGame('Roda Tech')
-      setIsSpinning(false)
-    }, 3000)
+    }, 3200) // Matches transition duration
   }
 
   // Speed Game Logic
@@ -170,7 +178,7 @@ export default function TotemExperience() {
   return (
     <main className="fixed inset-0 w-screen h-screen flex flex-col overflow-hidden select-none transition-all duration-700 ease-in-out bg-[#001D3D] bg-gradient-to-br from-[#001D3D] via-[#000814] to-[#000000]">
       
-      {/* Header Fixo - Apenas se não estiver na tela inicial */}
+      {/* Header - Only if not hero */}
       {state !== 'hero' && (
         <header className="h-28 px-12 flex justify-between items-center z-50 glass-nav border-b border-white/5 animate-reveal">
           <div className="flex items-center gap-6 cursor-pointer" onClick={resetToHero}>
@@ -193,10 +201,10 @@ export default function TotemExperience() {
 
       <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden p-12">
         
-        {/* TELA 1: HERO */}
+        {/* SCREEN 1: HERO */}
         {state === 'hero' && (
           <div className="flex flex-col items-center text-center animate-reveal max-w-6xl">
-            <div className="relative w-40 h-40 mb-16 animate-float">
+            <div className="relative w-48 h-48 mb-16 animate-float">
                <Image 
                 src={maLogo} 
                 alt="MA Logo" 
@@ -220,7 +228,7 @@ export default function TotemExperience() {
           </div>
         )}
 
-        {/* TELA DE ESCOLHA */}
+        {/* SCREEN: CHOICE */}
         {state === 'choice' && (
           <div className="w-full max-w-7xl animate-reveal text-center">
             <h2 className="text-6xl font-black mb-24 tracking-tighter text-white uppercase">Escolha seu desafio</h2>
@@ -247,7 +255,7 @@ export default function TotemExperience() {
           </div>
         )}
 
-        {/* GAME: CAIXA SURPRESA */}
+        {/* GAME: BOX SURPRISE */}
         {state === 'game-box' && (
           <div className="w-full max-w-6xl animate-reveal text-center">
             <h2 className="text-5xl font-black mb-24 text-white/20 uppercase tracking-widest">Escolha uma caixa</h2>
@@ -268,29 +276,40 @@ export default function TotemExperience() {
           </div>
         )}
 
-        {/* GAME: ROLETA TECH */}
+        {/* GAME: ROLETA TECH - IMPROVED WITH 8 SECTIONS AND MANUAL STOP */}
         {state === 'game-wheel' && (
           <div className="flex flex-col items-center animate-reveal">
             <div className="relative mb-24">
+              {/* Pointer */}
               <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-30">
                 <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-t-[60px] border-t-[#C5A059] filter drop-shadow-xl" />
               </div>
               <div className="p-8 bg-white/5 rounded-full border border-white/10 backdrop-blur-3xl">
                 <div 
-                  className="w-[550px] h-[550px] md:w-[750px] md:h-[750px] rounded-full bg-white/5 relative transition-transform duration-[4000ms] ease-[cubic-bezier(0.15,0,0.1,1)] flex items-center justify-center overflow-hidden border border-white/10"
-                  style={{ transform: `rotate(${rotation}deg)` }}
+                  className={cn(
+                    "w-[550px] h-[550px] md:w-[750px] md:h-[750px] rounded-full bg-white/5 relative transition-transform duration-[3000ms] ease-[cubic-bezier(0.15,0,0.1,1)] flex items-center justify-center overflow-hidden border border-white/10",
+                    spinPhase === 'spinning' && "animate-[spin_0.8s_linear_infinite]"
+                  )}
+                  style={{ transform: spinPhase === 'stopping' ? `rotate(${rotation}deg)` : undefined }}
                 >
-                  {[0, 1, 2, 3].map((_, i) => (
+                  {/* 8 Sections */}
+                  {[0, 1, 2, 3, 4, 5, 6, 7].map((_, i) => (
                     <div 
                       key={i} 
                       className="absolute w-full h-full" 
                       style={{ 
-                        transform: `rotate(${i * 90}deg)`,
-                        background: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent',
+                        transform: `rotate(${i * 45}deg)`,
+                        background: i % 2 === 0 ? 'rgba(197, 160, 89, 0.05)' : 'transparent',
                         transformOrigin: 'center'
                       }} 
-                    />
+                    >
+                       <div className="absolute top-12 left-1/2 -translate-x-1/2 text-white/10 font-black text-4xl uppercase tracking-tighter">
+                         MA
+                       </div>
+                    </div>
                   ))}
+                  
+                  {/* Center Logo Hub */}
                   <div className="absolute z-20 w-48 h-48 bg-[#001D3D] rounded-full shadow-[0_0_80px_rgba(0,0,0,0.5)] border border-white/10 flex items-center justify-center">
                     <div className="relative w-24 h-24">
                       <Image src={maLogo} alt="MA Logo" fill className="object-contain" />
@@ -299,13 +318,32 @@ export default function TotemExperience() {
                 </div>
               </div>
             </div>
-            <GlassButton variant="gold" onClick={spinWheel} disabled={isSpinning} className="w-full min-w-[500px]">
-              {isSpinning ? 'GIRANDO...' : 'GIRAR AGORA'}
-            </GlassButton>
+
+            {spinPhase === 'idle' && (
+              <GlassButton variant="gold" onClick={startSpinning} className="w-full min-w-[500px]">
+                GIRAR AGORA
+              </GlassButton>
+            )}
+            
+            {spinPhase === 'spinning' && (
+              <GlassButton 
+                variant="gold" 
+                onClick={stopSpinning} 
+                className="w-full min-w-[500px] bg-red-600 text-white shadow-[0_0_80px_rgba(220,38,38,0.3)]"
+              >
+                PARAR!
+              </GlassButton>
+            )}
+
+            {spinPhase === 'stopping' && (
+              <GlassButton variant="gold" disabled className="w-full min-w-[500px] opacity-80">
+                SESSÃO DA SORTE...
+              </GlassButton>
+            )}
           </div>
         )}
 
-        {/* GAME: TOQUE RÁPIDO */}
+        {/* GAME: SPEED TOUCH */}
         {state === 'game-speed' && (
           <div className="w-full max-w-6xl animate-reveal flex flex-col items-center">
             {!speedActive && speedScore === 0 ? (
@@ -358,7 +396,7 @@ export default function TotemExperience() {
           </div>
         )}
 
-        {/* TELA 3: RESULTADO */}
+        {/* SCREEN 3: RESULT */}
         {state === 'result' && (
           <div className="flex flex-col items-center text-center animate-reveal">
             <div className="w-48 h-48 rounded-[64px] bg-[#C5A059] flex items-center justify-center mb-20 shadow-[0_40px_80px_rgba(197,160,89,0.4)] animate-float">
@@ -375,7 +413,7 @@ export default function TotemExperience() {
           </div>
         )}
 
-        {/* TELA 4: INCENTIVO GOOGLE */}
+        {/* SCREEN 4: GOOGLE INCENTIVE */}
         {state === 'google-incentive' && (
           <div className="flex flex-col items-center text-center animate-reveal">
             <div className="flex gap-4 mb-20">
@@ -391,7 +429,7 @@ export default function TotemExperience() {
           </div>
         )}
 
-        {/* TELA 5: QR CODE */}
+        {/* SCREEN 5: QR CODE */}
         {state === 'qr-code' && (
           <div className="flex flex-col items-center text-center animate-reveal">
             <div className="bg-white p-24 rounded-[96px] mb-20 shadow-[0_60px_120px_rgba(0,0,0,0.5)] animate-reveal">
@@ -409,7 +447,7 @@ export default function TotemExperience() {
 
       </div>
 
-      {/* Footer Fixo */}
+      {/* Footer */}
       <footer className="h-24 px-12 flex justify-center items-center border-t border-white/5 bg-black/40 backdrop-blur-md">
         <span className="text-sm tracking-[1em] font-black uppercase text-white/20">
           MA IMPORTS — PREMIUM KIOSK EXPERIENCE
