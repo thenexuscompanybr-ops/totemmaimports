@@ -5,11 +5,9 @@
 @layer base {
   :root {
     --background: 0 0% 97%; /* #F7F8FA */
-    --foreground: 0 0% 0%; /* rgba(0,0,0,0.92) */
+    --foreground: 0 0% 0%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 11%;
     --primary: 0 0% 0%;
     --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 96%;
@@ -18,22 +16,8 @@
     --muted-foreground: 0 0% 40%;
     --accent: 0 0% 0%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 0%; /* Hairline default will be opacity 0.08 */
-    --input: 0 0% 92%;
-    --ring: 0 0% 0%;
-    --radius: 18px;
-  }
-
-  .dark {
-    --background: 240 10% 4%; /* #0A0A0C */
-    --foreground: 0 0% 100%;
-    --card: 240 10% 6%;
-    --card-foreground: 0 0% 100%;
-    --muted: 240 10% 10%;
-    --muted-foreground: 0 0% 60%;
-    --border: 0 0% 100%;
+    --border: 0 0% 0%;
+    --radius: 24px;
   }
 }
 
@@ -42,48 +26,34 @@
     @apply border-black/5;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
-  }
-  body {
-    @apply bg-background text-foreground overflow-x-hidden antialiased;
-    font-feature-settings: "cv11", "ss01", "ss02";
     touch-action: manipulation;
   }
+  body {
+    @apply bg-background text-foreground antialiased overflow-hidden h-screen w-screen fixed;
+    font-feature-settings: "cv11", "ss01", "ss02";
+  }
 }
 
-/* Glassmorphism */
 .glass-nav {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(247, 248, 250, 0.8);
   backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-}
-
-.dark .glass-nav {
-  background: rgba(10, 10, 12, 0.7);
-  backdrop-filter: blur(20px) saturate(180%);
-}
-
-/* Premium Animations */
-@keyframes reveal {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .animate-reveal {
   animation: reveal 520ms cubic-bezier(.2,.8,.2,1) forwards;
 }
 
-/* Hide scrollbars */
-::-webkit-scrollbar {
-  display: none;
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-/* Game Elements */
 .perspective-1000 {
   perspective: 1000px;
 }
@@ -96,18 +66,16 @@
   transform: rotateY(180deg);
 }
 
-.wheel-segment {
-  position: absolute;
-  width: 50%;
-  height: 50%;
-  transform-origin: 100% 100%;
-}
-
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-15px); }
 }
 
 .animate-float {
   animation: float 4s ease-in-out infinite;
+}
+
+/* Hide scrollbars everywhere */
+::-webkit-scrollbar {
+  display: none;
 }
