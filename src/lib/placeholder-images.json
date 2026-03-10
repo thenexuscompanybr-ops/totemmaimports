@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "iphone-hero",
+      "description": "Premium 3D render of an iPhone floating",
+      "imageUrl": "https://images.unsplash.com/photo-1616348436168-de43ad0db179?q=80&w=800&auto=format&fit=crop",
+      "imageHint": "iphone premium 3d"
+    },
+    {
+      "id": "ma-logo",
+      "description": "MA Imports Logo Placeholder",
+      "imageUrl": "https://picsum.photos/seed/maimports/200/200",
+      "imageHint": "tech logo"
+    }
+  ]
 }
