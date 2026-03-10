@@ -30,14 +30,10 @@
 @layer base {
   * {
     @apply border-border;
-    -webkit-tap-highlight-color: transparent;
   }
   body {
     @apply bg-background text-foreground selection:bg-primary/30;
     font-feature-settings: "cv11", "ss01";
-    overscroll-behavior: none;
-    -webkit-user-select: none;
-    user-select: none;
   }
 }
 

@@ -14,9 +14,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: 'cover',
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({
@@ -25,14 +24,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="select-none touch-none overflow-hidden">
+    <html lang="pt-BR">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-        <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className="font-body antialiased bg-background text-foreground min-h-screen overflow-hidden h-full w-full fixed inset-0">
+      <body className="font-body antialiased bg-background text-foreground min-h-screen relative">
         <div className="glow-bg" />
         <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-20">
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary rounded-full blur-[120px]" />
