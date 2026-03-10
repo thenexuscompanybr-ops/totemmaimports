@@ -18,22 +18,22 @@ export function GlassButton({
 }: GlassButtonProps) {
   
   const variants = {
-    primary: "bg-black text-white hover:bg-[#2c2c2e] shadow-lg",
-    secondary: "bg-[#F5F5F7] text-black hover:bg-[#e8e8ed] shadow-sm",
-    outline: "border-[2px] border-black/10 text-black hover:bg-zinc-50"
+    primary: "bg-black text-white hover:bg-black/80 shadow-[0_10px_30px_rgba(0,0,0,0.15)]",
+    secondary: "bg-white text-black hover:bg-black/5 shadow-sm border border-black/5",
+    outline: "border-[1.5px] border-black/10 text-black hover:bg-black/5"
   }
 
   const sizes = {
-    sm: "px-6 py-3 text-sm font-bold",
-    md: "px-10 py-5 text-lg font-bold",
-    lg: "px-12 py-6 text-xl font-bold tracking-tight",
-    xl: "px-16 py-8 text-2xl font-bold tracking-tight"
+    sm: "px-6 py-3 text-xs font-bold uppercase tracking-wider",
+    md: "px-8 py-4 text-base font-bold",
+    lg: "px-10 py-5 text-lg font-bold tracking-tight",
+    xl: "px-14 py-6 text-xl font-bold tracking-tight"
   }
 
   return (
     <button
       className={cn(
-        "relative inline-flex items-center justify-center transition-all duration-300 active:scale-90 disabled:opacity-50 disabled:pointer-events-none overflow-hidden group select-none font-bold",
+        "relative inline-flex items-center justify-center transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none overflow-hidden group select-none rounded-full",
         variants[variant],
         sizes[size],
         className

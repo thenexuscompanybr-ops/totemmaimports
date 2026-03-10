@@ -52,18 +52,10 @@ export default function MADiscovery() {
   // Inactivity Timer for Totem (2 minutes)
   React.useEffect(() => {
     if (state === 'hero') return;
-
-    const timer = setTimeout(() => {
-      resetToHero();
-    }, 120000);
-
-    const handleInteraction = () => {
-      clearTimeout(timer);
-    };
-
+    const timer = setTimeout(() => resetToHero(), 120000);
+    const handleInteraction = () => clearTimeout(timer);
     window.addEventListener('touchstart', handleInteraction, { passive: true });
     window.addEventListener('mousedown', handleInteraction);
-
     return () => {
       clearTimeout(timer);
       window.removeEventListener('touchstart', handleInteraction);
@@ -105,14 +97,11 @@ export default function MADiscovery() {
 
   const handleCardClick = (id: number) => {
     if (flippedCards.length === 2 || cards[id].isFlipped || cards[id].isMatched) return
-
     const newCards = [...cards]
     newCards[id].isFlipped = true
     setCards(newCards)
-
     const newFlipped = [...flippedCards, id]
     setFlippedCards(newFlipped)
-
     if (newFlipped.length === 2) {
       const [firstId, secondId] = newFlipped
       if (cards[firstId].name === cards[secondId].name) {
@@ -131,7 +120,7 @@ export default function MADiscovery() {
           resetCards[secondId].isFlipped = false
           setCards(resetCards)
           setFlippedCards([])
-        }, 1000)
+        }, 800)
       }
     }
   }
@@ -158,8 +147,8 @@ export default function MADiscovery() {
   }
 
   const moveTarget = () => {
-    const top = Math.random() * 60 + 20 + '%'
-    const left = Math.random() * 60 + 20 + '%'
+    const top = Math.random() * 70 + 15 + '%'
+    const left = Math.random() * 70 + 15 + '%'
     setTargetPos({ top, left })
   }
 
@@ -180,267 +169,274 @@ export default function MADiscovery() {
   }, [speedActive, timeLeft])
 
   return (
-    <main className="relative z-10 mx-auto max-w-[1920px] min-h-screen flex flex-col font-body antialiased selection:bg-black selection:text-white">
-      {/* Apple-style Navigation */}
-      <nav className="sticky top-0 z-50 apple-blur px-12 py-8 flex justify-between items-center border-b border-black/5">
-        <div className="flex items-center gap-4 cursor-pointer" onClick={resetToHero}>
-          <div className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center shadow-xl">
-            <Smartphone className="w-7 h-7" />
+    <main className="relative z-10 mx-auto min-h-screen flex flex-col font-sans selection:bg-black selection:text-white bg-[#F7F8FA]">
+      
+      {/* Navbar Glass */}
+      <nav className="sticky top-0 z-50 glass-nav px-8 md:px-20 h-24 flex justify-between items-center border-b border-black/[0.05]">
+        <div className="flex items-center gap-3 cursor-pointer group" onClick={resetToHero}>
+          <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center transition-transform group-hover:scale-110">
+            <Smartphone className="w-5 h-5 text-white" />
           </div>
-          <span className="font-bold text-2xl tracking-tight text-black">MA Discovery</span>
+          <span className="font-bold text-xl tracking-tight text-black">MA Discovery</span>
         </div>
         {state !== 'hero' && (
           <button 
             onClick={resetToHero}
-            className="flex items-center gap-2 text-sm font-bold opacity-40 hover:opacity-100 transition-all duration-300"
+            className="flex items-center gap-2 text-sm font-semibold opacity-60 hover:opacity-100 transition-all"
           >
-            <ArrowLeft className="w-5 h-5" /> Início
+            <ArrowLeft className="w-4 h-4" /> Início
           </button>
         )}
       </nav>
 
-      <div className="relative flex-1 flex flex-col items-center justify-center px-10">
+      <div className="flex-1 flex flex-col items-center">
         
-        {/* HERO STATE */}
+        {/* HERO SECTION */}
         {state === 'hero' && (
-          <div className="flex flex-col items-center text-center animate-fade-in py-20">
-            <h1 className="text-[7rem] md:text-[12rem] font-bold tracking-tight mb-8 leading-[0.9] text-black">
-              Experiência.<br/>
-              <span className="text-muted-foreground/20 font-light">Discovery.</span>
+          <section className="w-full flex flex-col items-center justify-center min-h-[85vh] text-center px-6 animate-reveal">
+            <h1 className="text-[clamp(2.5rem,8vw,5.5rem)] font-extrabold tracking-tight leading-[1.05] text-black max-w-5xl mb-12">
+              Experiência Digital.<br/>
+              <span className="text-black/30">Redefinida.</span>
             </h1>
-            <p className="text-2xl md:text-4xl text-muted-foreground/60 mb-20 font-medium max-w-4xl tracking-tight">
-              A jornada tecnológica da MA Imports começa aqui.<br/>Toque para descobrir seu benefício.
+            <p className="text-lg md:text-2xl text-black/60 font-medium max-w-2xl mb-16 leading-relaxed">
+              Descubra um novo padrão de tecnologia na MA Imports através de nossos desafios interativos.
             </p>
             <GlassButton 
               size="xl" 
               onClick={() => setState('choice')} 
-              className="h-28 min-w-[450px] rounded-full shadow-[0_30px_60px_rgba(0,0,0,0.12)] text-3xl"
+              className="shadow-[0_20px_40px_rgba(0,0,0,0.1)]"
             >
-              Iniciar Descoberta <ChevronRight className="ml-3 w-8 h-8" />
+              Iniciar Descoberta <ChevronRight className="ml-2 w-6 h-6" />
             </GlassButton>
-          </div>
+          </section>
         )}
 
-        {/* CHOICE STATE */}
+        {/* CHOICE SECTION (Dark Rhythm) */}
         {state === 'choice' && (
-          <div className="w-full animate-fade-in max-w-7xl py-20">
-            <h2 className="text-6xl md:text-8xl font-bold mb-24 text-center tracking-tight text-black">Escolha seu Desafio.</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <section className="w-full min-h-[90vh] bg-[#0A0A0C] flex flex-col items-center justify-center py-24 px-6 animate-reveal">
+            <h2 className="text-[clamp(2rem,5vw,3.5rem)] font-bold mb-20 text-white text-center tracking-tight">Qual o seu desafio hoje?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl">
               {[
-                { id: 'game-box', icon: Box, name: 'Caixas', desc: 'Sorte Pura.', color: 'bg-zinc-50' },
-                { id: 'game-wheel', icon: RotateCcw, name: 'Roda Tech', desc: 'Gire e Ganhe.', color: 'bg-zinc-50' },
-                { id: 'game-speed', icon: Zap, name: 'Reflexo', desc: 'Toque Rápido.', color: 'bg-zinc-50' },
-                { id: 'game-memory', icon: Monitor, name: 'Memória', desc: 'Foco Total.', color: 'bg-zinc-50', action: initMemoryGame },
+                { id: 'game-box', icon: Box, name: 'Caixas', desc: 'Intuição Pura.' },
+                { id: 'game-wheel', icon: RotateCcw, name: 'Roda Tech', desc: 'Momento de Sorte.' },
+                { id: 'game-speed', icon: Zap, name: 'Reflexo', desc: 'Agilidade Digital.' },
+                { id: 'game-memory', icon: Monitor, name: 'Memória', desc: 'Foco Absoluto.', action: initMemoryGame },
               ].map((game) => (
                 <button
                   key={game.id}
                   onClick={() => game.action ? game.action() : setState(game.id as any)}
-                  className={cn(
-                    "relative p-12 rounded-[3.5rem] border border-black/[0.03] flex flex-col items-center text-center group hover:scale-[1.02] active:scale-95 transition-all duration-500 shadow-sm hover:shadow-xl overflow-hidden",
-                    game.color
-                  )}
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 p-10 rounded-[28px] flex flex-col items-center text-center group hover:bg-white hover:border-white transition-all duration-500"
                 >
-                  <div className="w-24 h-24 rounded-[2rem] flex items-center justify-center mb-10 bg-white border border-black/5 group-hover:bg-black group-hover:text-white transition-all duration-500 shadow-sm">
-                    <game.icon className="w-10 h-10 transition-transform duration-500 group-hover:rotate-12" />
+                  <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-8 group-hover:bg-black group-hover:text-white transition-all">
+                    <game.icon className="w-7 h-7 text-white group-hover:text-white" />
                   </div>
-                  <h3 className="text-3xl font-bold mb-3 tracking-tight text-black">{game.name}</h3>
-                  <p className="text-lg text-muted-foreground/50 font-medium">{game.desc}</p>
+                  <h3 className="text-2xl font-bold mb-2 text-white group-hover:text-black tracking-tight">{game.name}</h3>
+                  <p className="text-white/40 group-hover:text-black/60 font-medium">{game.desc}</p>
                 </button>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* GAME: MEMORY */}
         {state === 'game-memory' && (
-          <div className="flex flex-col items-center animate-fade-in w-full max-w-6xl py-12">
-            <h2 className="text-6xl font-bold mb-6 tracking-tight text-black">Jogo da Memória</h2>
-            <p className="text-2xl text-muted-foreground/60 mb-16 font-medium">Combine os ícones premium.</p>
-            <div className="grid grid-cols-3 md:grid-cols-4 gap-6 w-full px-4">
+          <section className="w-full py-20 px-6 animate-reveal max-w-5xl">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight text-black">Jogo da Memória</h2>
+              <p className="text-xl text-black/40 font-medium">Combine os produtos premium MA.</p>
+            </div>
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
               {cards.map((card) => (
                 <button
                   key={card.id}
                   onClick={() => handleCardClick(card.id)}
                   className={cn(
-                    "relative h-[200px] md:h-[260px] rounded-[3rem] transition-all duration-500 perspective-1000",
+                    "relative h-[160px] md:h-[220px] transition-all duration-500 perspective-1000",
                     (card.isFlipped || card.isMatched) ? "rotate-y-180" : ""
                   )}
                 >
                   <div className={cn(
-                    "absolute inset-0 w-full h-full rounded-[3rem] transition-all duration-500 preserve-3d flex items-center justify-center shadow-sm",
+                    "absolute inset-0 w-full h-full rounded-[24px] transition-all duration-500 preserve-3d flex items-center justify-center shadow-sm border",
                     (card.isFlipped || card.isMatched) 
-                      ? "bg-white border border-black/10" 
-                      : "bg-zinc-50 border border-black/[0.03] hover:bg-zinc-100"
+                      ? "bg-white border-black/10" 
+                      : "bg-white border-black/[0.05] hover:border-black/20"
                   )}>
                     {(card.isFlipped || card.isMatched) ? (
-                      <card.icon className="w-16 h-16 text-black" />
+                      <card.icon className="w-12 h-12 text-black" />
                     ) : (
-                      <div className="w-14 h-14 bg-black/5 rounded-full flex items-center justify-center">
-                        <Smartphone className="w-6 h-6 text-black/10" />
+                      <div className="w-10 h-10 bg-black/[0.03] rounded-full flex items-center justify-center">
+                        <Smartphone className="w-5 h-5 text-black/10" />
                       </div>
                     )}
                   </div>
                 </button>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* GAME: CAIXA PREMIADA */}
         {state === 'game-box' && (
-          <div className="flex flex-col items-center animate-fade-in w-full max-w-6xl py-12">
-            <h2 className="text-6xl font-bold mb-6 tracking-tight text-black">Caixa Premiada</h2>
-            <p className="text-2xl text-muted-foreground/60 mb-20 font-medium">Escolha uma e revele seu benefício.</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-full">
+          <section className="w-full py-20 px-6 animate-reveal max-w-6xl">
+            <div className="text-center mb-20">
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight text-black">Caixa Premiada</h2>
+              <p className="text-xl text-black/40 font-medium">Sua intuição leva ao prêmio.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[0, 1, 2].map((i) => (
                 <button 
                   key={i} 
-                  onClick={() => {
-                    setSelectedBox(i)
-                    finalizeGame('Caixa Premiada')
-                  }}
+                  onClick={() => { setSelectedBox(i); finalizeGame('Caixa Premiada'); }}
                   className={cn(
-                    "relative h-[400px] bg-zinc-50 rounded-[4rem] border border-black/[0.03] cursor-pointer transition-all duration-500 hover:shadow-2xl hover:-translate-y-4 flex flex-col items-center justify-center group active:scale-95",
-                    selectedBox === i && "animate-shake bg-white border-black/10"
+                    "relative h-[350px] bg-white rounded-[32px] border border-black/5 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 flex flex-col items-center justify-center group active:scale-95",
+                    selectedBox === i && "animate-pulse border-black/20"
                   )}
                 >
-                  <div className="relative">
-                    <Gift className={cn(
-                      "w-32 h-32 text-black transition-all duration-700",
-                      selectedBox === i ? "scale-125 opacity-100" : "opacity-10 group-hover:opacity-100"
-                    )} />
-                  </div>
-                  <div className="mt-12 text-xs font-bold uppercase tracking-[0.3em] opacity-20">Selecionar</div>
+                  <Gift className={cn(
+                    "w-20 h-20 transition-all duration-500",
+                    selectedBox === i ? "text-black scale-110" : "text-black/10 group-hover:text-black"
+                  )} />
+                  <span className="mt-10 text-[10px] font-bold uppercase tracking-[0.2em] opacity-20">Escolher</span>
                 </button>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* GAME: RODA TECH */}
         {state === 'game-wheel' && (
-          <div className="flex flex-col items-center animate-fade-in w-full py-12">
-            <h2 className="text-6xl font-bold mb-6 tracking-tight text-black">Roda Tech</h2>
-            <p className="text-2xl text-muted-foreground/60 mb-20 font-medium">Gire para descobrir seu prêmio.</p>
-            <div className="relative mb-24">
-              <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 z-30 drop-shadow-xl">
-                <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[40px] border-t-black" />
+          <section className="w-full py-20 px-6 animate-reveal flex flex-col items-center">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight text-black">Roda Tech</h2>
+              <p className="text-xl text-black/40 font-medium">Gire para descobrir seu benefício.</p>
+            </div>
+            <div className="relative mb-20">
+              <div className="absolute top-[-25px] left-1/2 -translate-x-1/2 z-30">
+                <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[30px] border-t-black" />
               </div>
-              <div className="relative p-8 bg-zinc-50 rounded-full shadow-2xl border-[10px] border-white">
+              <div className="p-4 bg-white rounded-full shadow-2xl border border-black/5">
                 <div 
-                  className="w-[500px] h-[500px] md:w-[650px] md:h-[650px] rounded-full bg-white relative transition-transform duration-[4500ms] ease-[cubic-bezier(0.15,0,0.15,1)] flex items-center justify-center overflow-hidden border border-black/5"
+                  className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-[#F7F8FA] relative transition-transform duration-[4500ms] ease-[cubic-bezier(0.15,0,0.15,1)] flex items-center justify-center overflow-hidden border border-black/5"
                   style={{ transform: `rotate(${rotation}deg)` }}
                 >
                   {[0, 1, 2, 3].map((_, i) => (
-                    <div key={i} className="wheel-segment" style={{ transform: `rotate(${i * 90}deg) skewY(-45deg)` }} />
+                    <div 
+                      key={i} 
+                      className="wheel-segment absolute w-full h-full" 
+                      style={{ 
+                        transform: `rotate(${i * 90}deg)`,
+                        background: i % 2 === 0 ? 'white' : 'rgba(0,0,0,0.02)'
+                      }} 
+                    />
                   ))}
-                  <div className="absolute z-20 w-40 h-40 bg-white rounded-full shadow-xl border-[10px] border-zinc-50 flex items-center justify-center">
-                    <Smartphone className="w-16 h-16 text-black" />
+                  <div className="absolute z-20 w-32 h-32 bg-white rounded-full shadow-lg border-4 border-[#F7F8FA] flex items-center justify-center">
+                    <Smartphone className="w-10 h-10 text-black" />
                   </div>
                 </div>
               </div>
             </div>
-            <GlassButton size="xl" onClick={spinWheel} disabled={isSpinning} className="h-28 min-w-[450px] rounded-full shadow-xl text-3xl">
+            <GlassButton size="xl" onClick={spinWheel} disabled={isSpinning} className="min-w-[320px]">
               {isSpinning ? 'Sorteando...' : 'Girar Agora'}
             </GlassButton>
-          </div>
+          </section>
         )}
 
         {/* GAME: TOQUE RÁPIDO */}
         {state === 'game-speed' && (
-          <div className="flex flex-col items-center w-full animate-fade-in max-w-6xl py-12">
+          <section className="w-full py-20 px-6 animate-reveal max-w-4xl flex flex-col items-center">
             {!speedActive && speedScore === 0 ? (
               <div className="text-center">
-                <h2 className="text-6xl font-bold mb-6 tracking-tight text-black">Toque Rápido</h2>
-                <p className="text-2xl text-muted-foreground/60 mb-20 font-medium max-w-2xl mx-auto">Sua agilidade define sua recompensa. Toque nos alvos o mais rápido possível.</p>
-                <GlassButton size="xl" onClick={startSpeedGame} className="h-28 min-w-[400px] rounded-full text-3xl">Começar Desafio</GlassButton>
+                <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight text-black">Toque Rápido</h2>
+                <p className="text-xl text-black/40 mb-16 font-medium max-w-lg mx-auto">Sua agilidade digital define sua recompensa.</p>
+                <GlassButton size="xl" onClick={startSpeedGame} className="min-w-[300px]">Começar</GlassButton>
               </div>
             ) : (
               <div className="w-full flex flex-col items-center">
-                <div className="flex justify-between w-full mb-16 px-12">
+                <div className="flex justify-between w-full mb-12 px-4">
                   <div className="flex flex-col">
-                    <span className="text-xs uppercase tracking-[0.3em] opacity-40 font-bold mb-2">Tempo</span>
-                    <div className="text-6xl font-bold tabular-nums">{timeLeft}s</div>
+                    <span className="text-[10px] uppercase tracking-widest opacity-40 font-bold mb-1">Tempo</span>
+                    <div className="text-4xl font-bold tabular-nums">{timeLeft}s</div>
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="text-xs uppercase tracking-[0.3em] opacity-40 font-bold mb-2">Acertos</span>
-                    <div className="text-6xl font-bold tabular-nums">{speedScore}</div>
+                    <span className="text-[10px] uppercase tracking-widest opacity-40 font-bold mb-1">Score</span>
+                    <div className="text-4xl font-bold tabular-nums">{speedScore}</div>
                   </div>
                 </div>
-                <div className="relative w-full aspect-[16/10] bg-zinc-50 border border-black/[0.03] rounded-[4rem] overflow-hidden shadow-sm">
+                <div className="relative w-full aspect-[16/10] bg-white border border-black/5 rounded-[32px] overflow-hidden shadow-sm">
                   <button
                     onClick={handleTargetHit}
-                    className="absolute w-32 h-32 bg-black text-white rounded-[2.5rem] shadow-2xl flex items-center justify-center transition-all duration-75 active:scale-110"
+                    className="absolute w-24 h-24 bg-black text-white rounded-[22px] shadow-xl flex items-center justify-center transition-all duration-75 active:scale-110"
                     style={{ top: targetPos.top, left: targetPos.left }}
                   >
-                    <Zap className="w-16 h-16 fill-current" />
+                    <Zap className="w-10 h-10 fill-current" />
                   </button>
                 </div>
               </div>
             )}
-          </div>
+          </section>
         )}
 
-        {/* RESULT STATE */}
+        {/* RESULT SECTION */}
         {state === 'result' && (
-          <div className="flex flex-col items-center text-center px-10 animate-scale-in max-w-5xl py-20">
-            <div className="w-40 h-40 rounded-[2.5rem] bg-black text-white flex items-center justify-center mb-16 shadow-2xl">
-              <Trophy className="w-20 h-20" />
+          <section className="w-full min-h-[85vh] flex flex-col items-center justify-center text-center px-6 animate-reveal">
+            <div className="w-24 h-24 rounded-3xl bg-black flex items-center justify-center mb-12 shadow-2xl">
+              <Trophy className="w-12 h-12 text-white" />
             </div>
-            <h2 className="text-8xl md:text-9xl font-bold mb-8 tracking-tight text-black leading-none">Incrível.</h2>
-            <p className="text-3xl font-medium opacity-20 mb-20 tracking-tight uppercase">Você conquistou:</p>
-            <div className="relative w-full bg-zinc-50 border border-black/[0.03] p-20 rounded-[4rem] shadow-sm mb-24 overflow-hidden">
-               <h3 className="text-5xl md:text-8xl font-bold tracking-tight leading-tight text-black">{reward}</h3>
+            <h2 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight text-black">Parabéns.</h2>
+            <p className="text-lg uppercase tracking-[0.3em] font-bold opacity-30 mb-16">Seu benefício exclusivo:</p>
+            <div className="bg-white border border-black/5 p-12 md:p-20 rounded-[40px] shadow-sm mb-20 w-full max-w-4xl">
+               <h3 className="text-3xl md:text-6xl font-bold tracking-tight text-black">{reward}</h3>
             </div>
-            <GlassButton size="xl" onClick={() => setState('evaluation')} className="h-28 min-w-[500px] rounded-full text-3xl">
-              Continuar <ChevronRight className="ml-3 w-8 h-8" />
+            <GlassButton size="xl" onClick={() => setState('evaluation')} className="min-w-[350px]">
+              Continuar <ChevronRight className="ml-2 w-6 h-6" />
             </GlassButton>
-          </div>
+          </section>
         )}
 
-        {/* EVALUATION STATE */}
+        {/* EVALUATION SECTION */}
         {state === 'evaluation' && (
-          <div className="flex flex-col items-center text-center px-10 animate-fade-in max-w-4xl py-20">
-            <h2 className="text-6xl md:text-8xl font-bold mb-12 tracking-tight leading-[0.9] text-black">
-              Sua Experiência.<br/>
-              <span className="opacity-10 italic font-light">Avalie-nos.</span>
+          <section className="w-full min-h-[85vh] bg-[#0A0A0C] flex flex-col items-center justify-center text-center px-6 animate-reveal">
+            <h2 className="text-4xl md:text-6xl font-bold mb-8 text-white tracking-tight">
+              Sua experiência importa.
             </h2>
-            <p className="text-2xl text-muted-foreground/40 mb-24 font-medium leading-relaxed max-w-2xl">
-              Sua opinião nos ajuda a elevar o padrão de excelência MA Imports.
+            <p className="text-xl text-white/40 mb-20 font-medium max-w-xl">
+              Como foi sua jornada hoje na MA Imports? Sua avaliação nos ajuda a evoluir.
             </p>
-            <div className="flex flex-col gap-8 w-full max-w-xl">
-              <GlassButton variant="primary" size="xl" className="w-full h-32 text-3xl rounded-[3rem] shadow-xl">
+            <div className="flex flex-col gap-6 w-full max-w-md">
+              <GlassButton variant="primary" size="xl" className="bg-white text-black hover:bg-white/90">
                 Avaliar no Google
               </GlassButton>
-              <button onClick={() => setState('final')} className="text-2xl font-bold opacity-20 hover:opacity-100 transition-opacity py-8 active:scale-95">
+              <button onClick={() => setState('final')} className="text-white/20 hover:text-white transition-colors py-4 font-bold">
                 Pular Avaliação
               </button>
             </div>
-          </div>
+          </section>
         )}
 
-        {/* FINAL STATE */}
+        {/* FINAL SECTION */}
         {state === 'final' && (
-          <div className="flex flex-col items-center text-center px-10 animate-fade-in max-w-5xl py-20">
-            <div className="bg-white p-20 rounded-[5rem] mb-20 shadow-2xl border border-black/5">
-              <QrCode className="w-[400px] h-[400px] text-black opacity-90" />
+          <section className="w-full min-h-[85vh] flex flex-col items-center justify-center text-center px-6 animate-reveal">
+            <div className="bg-white p-16 rounded-[48px] mb-16 shadow-2xl border border-black/5 animate-float">
+              <QrCode className="w-64 h-64 text-black/90" />
             </div>
-            <h2 className="text-7xl font-bold mb-8 tracking-tight text-black">Conheça o Catálogo.</h2>
-            <p className="text-2xl text-muted-foreground/40 mb-24 font-medium tracking-tight">Escaneie o código acima e explore o ecossistema Apple completo.</p>
-            <div className="flex flex-col gap-8 w-full max-w-xl">
-              <GlassButton className="bg-[#25D366] hover:bg-[#20ba59] border-none h-32 text-3xl rounded-[3rem] text-white shadow-xl">
-                <MessageCircle className="w-10 h-10 fill-current" /> Falar com Especialista
+            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight text-black">Acesse o catálogo.</h2>
+            <p className="text-xl text-black/40 mb-16 font-medium max-w-lg">Escaneie o código e descubra o ecossistema completo da MA Imports.</p>
+            <div className="flex flex-col gap-6 w-full max-w-md">
+              <GlassButton className="bg-[#25D366] hover:bg-[#20ba59] border-none text-white shadow-lg">
+                <MessageCircle className="w-6 h-6 mr-2 fill-current" /> WhatsApp Business
               </GlassButton>
-              <button onClick={resetToHero} className="text-xl font-bold opacity-10 hover:opacity-100 transition-opacity py-10 tracking-[0.2em] uppercase active:scale-95">
+              <button onClick={resetToHero} className="text-[10px] font-bold opacity-20 hover:opacity-100 transition-opacity uppercase tracking-[0.4em] py-8">
                 Encerrar Experiência
               </button>
             </div>
-          </div>
+          </section>
         )}
       </div>
 
-      <footer className="p-16 text-center text-[10px] tracking-[0.6em] font-bold uppercase opacity-10 shrink-0 text-black">
-        MA IMPORTS — PREMIUM TECHNOLOGY EXPERIENCE
+      <footer className="py-12 px-8 flex justify-center border-t border-black/[0.03]">
+        <span className="text-[9px] tracking-[0.5em] font-bold uppercase opacity-10 text-black">
+          MA IMPORTS — PREMIUM TECHNOLOGY EXPERIENCE
+        </span>
       </footer>
     </main>
   )
