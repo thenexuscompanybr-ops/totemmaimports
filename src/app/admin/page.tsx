@@ -23,55 +23,55 @@ export default function AdminDashboard() {
     { name: 'Memória', value: stats.sessions.filter(s => s.game === 'Jogo da Memória').length },
   ]
 
-  const COLORS = ['#001D3D', '#003566', '#C5A059', '#E8E8ED']
+  const COLORS = ['#C5A059', '#D4AF37', '#B8860B', '#DAA520']
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] p-12 font-body selection:bg-[#001D3D] selection:text-white">
+    <div className="min-h-screen bg-[#000814] p-12 font-body selection:bg-[#C5A059] selection:text-white text-white">
       <div className="max-w-7xl mx-auto">
         <header className="flex justify-between items-center mb-16">
           <div>
-            <Link href="/" className="flex items-center gap-2 text-sm font-bold text-[#001D3D]/30 hover:text-[#001D3D] transition-all mb-4">
+            <Link href="/" className="flex items-center gap-2 text-sm font-bold text-white/30 hover:text-white transition-all mb-4 uppercase tracking-widest">
               <ArrowLeft className="w-4 h-4" /> Voltar ao Totem
             </Link>
-            <h1 className="text-5xl font-bold tracking-tight text-[#001D3D]">MA Discovery Admin</h1>
-            <p className="text-[#C5A059] font-bold uppercase text-[10px] tracking-[0.4em] mt-3">Gestão de Engajamento</p>
+            <h1 className="text-6xl font-black tracking-tighter text-white uppercase">Dashboard</h1>
+            <p className="text-[#C5A059] font-black uppercase text-xs tracking-[0.5em] mt-4">Gestão de Engajamento MA Imports</p>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16">
           {[
-            { label: 'Interações Totais', value: stats.total, icon: Users, color: 'text-[#001D3D]' },
+            { label: 'Interações Totais', value: stats.total, icon: Users, color: 'text-[#C5A059]' },
             { label: 'Sessões Hoje', value: stats.today, icon: TrendingUp, color: 'text-[#C5A059]' },
             { label: 'Status Sistema', value: 'Online', icon: Activity, color: 'text-green-500' },
           ].map((stat, i) => (
-            <Card key={i} className="bg-white border-none rounded-[3rem] shadow-sm p-10">
+            <Card key={i} className="bg-white/5 border-white/10 rounded-[48px] p-10 backdrop-blur-3xl shadow-2xl">
               <div className="flex justify-between items-start mb-8">
-                <div className={`p-4 rounded-2xl bg-[#F7F8FA] ${stat.color}`}>
-                  <stat.icon className="w-8 h-8" />
+                <div className={`p-5 rounded-[24px] bg-white/5 ${stat.color}`}>
+                  <stat.icon className="w-10 h-10" />
                 </div>
               </div>
-              <div className="text-5xl font-bold mb-2 text-[#001D3D]">{stat.value}</div>
-              <div className="text-[10px] text-[#001D3D]/30 uppercase tracking-[0.3em] font-black">{stat.label}</div>
+              <div className="text-6xl font-black mb-3 text-white tracking-tighter">{stat.value}</div>
+              <div className="text-xs text-white/30 uppercase tracking-[0.4em] font-black">{stat.label}</div>
             </Card>
           ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <Card className="bg-white border-none rounded-[3rem] shadow-sm p-8">
-            <CardHeader className="px-0 pt-0 pb-10">
-              <CardTitle className="text-2xl font-bold tracking-tight text-[#001D3D]">Popularidade por Jogo</CardTitle>
+          <Card className="bg-white/5 border-white/10 rounded-[48px] p-10 backdrop-blur-3xl shadow-2xl">
+            <CardHeader className="px-0 pt-0 pb-12">
+              <CardTitle className="text-3xl font-black tracking-tight text-white uppercase">Engajamento por Jogo</CardTitle>
             </CardHeader>
-            <CardContent className="h-[400px] px-0">
+            <CardContent className="h-[450px] px-0">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#00000005" vertical={false} />
-                  <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                  <XAxis dataKey="name" stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#ffffff40" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
-                    cursor={{ fill: '#001D3D05' }}
-                    contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,29,61,0.05)' }}
+                    cursor={{ fill: '#ffffff05' }}
+                    contentStyle={{ backgroundColor: '#001D3D', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '32px', boxShadow: '0 40px 80px rgba(0,0,0,0.5)' }}
                   />
-                  <Bar dataKey="value" radius={[12, 12, 12, 12]} barSize={40}>
+                  <Bar dataKey="value" radius={[16, 16, 16, 16]} barSize={50}>
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -81,25 +81,25 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-none rounded-[3rem] shadow-sm p-8">
-            <CardHeader className="px-0 pt-0 pb-10">
-              <CardTitle className="text-2xl font-bold tracking-tight text-[#001D3D]">Atividade Recente</CardTitle>
+          <Card className="bg-white/5 border-white/10 rounded-[48px] p-10 backdrop-blur-3xl shadow-2xl">
+            <CardHeader className="px-0 pt-0 pb-12">
+              <CardTitle className="text-3xl font-black tracking-tight text-white uppercase">Sessões Recentes</CardTitle>
             </CardHeader>
             <CardContent className="px-0">
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {stats.sessions.slice(-6).reverse().map((session, i) => (
-                  <div key={i} className="flex justify-between items-center p-8 rounded-[2.5rem] bg-[#F7F8FA] border border-[#001D3D]/05">
+                  <div key={i} className="flex justify-between items-center p-8 rounded-[32px] bg-white/5 border border-white/5 hover:border-[#C5A059]/30 transition-all">
                     <div>
-                      <div className="font-bold text-xl leading-none mb-2 text-[#C5A059]">{session.reward}</div>
-                      <div className="text-xs text-[#001D3D]/30 font-black uppercase tracking-widest">{session.game}</div>
+                      <div className="font-black text-2xl leading-none mb-3 text-[#C5A059] uppercase tracking-tight">{session.reward}</div>
+                      <div className="text-xs text-white/30 font-black uppercase tracking-widest">{session.game}</div>
                     </div>
-                    <div className="text-[10px] text-[#001D3D]/40 font-black uppercase bg-white px-4 py-2 rounded-full border border-[#001D3D]/05">
+                    <div className="text-xs text-white/50 font-black uppercase bg-white/5 px-5 py-3 rounded-full border border-white/10">
                       {new Date(session.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
                 ))}
                 {stats.sessions.length === 0 && (
-                  <div className="text-center py-20 text-[#001D3D]/20 font-bold">Nenhuma atividade registrada ainda.</div>
+                  <div className="text-center py-24 text-white/10 font-black text-2xl uppercase tracking-widest">Aguardando dados...</div>
                 )}
               </div>
             </CardContent>

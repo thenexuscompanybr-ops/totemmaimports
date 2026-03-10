@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 215 100% 98%; /* Off-white azulado */
-    --foreground: 215 100% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 215 100% 10%;
-    --primary: 215 100% 12%; /* Azul Marinho Profundo */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 43 52% 56%; /* Dourado Sofisticado */
+    --background: 215 100% 4%; /* Azul marinho quase preto */
+    --foreground: 0 0% 100%;
+    --card: 215 100% 8%;
+    --card-foreground: 0 0% 100%;
+    --primary: 43 52% 56%; /* Dourado */
+    --primary-foreground: 215 100% 10%;
+    --secondary: 215 100% 12%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 215 20% 94%;
-    --muted-foreground: 215 20% 40%;
-    --accent: 43 52% 56%; /* Dourado para Destaques */
-    --accent-foreground: 0 0% 100%;
-    --border: 215 100% 12% / 0.1;
-    --radius: 24px;
+    --muted: 215 50% 15%;
+    --muted-foreground: 215 20% 60%;
+    --accent: 43 52% 56%;
+    --accent-foreground: 215 100% 10%;
+    --border: 215 100% 20% / 0.2;
+    --radius: 32px;
   }
 }
 
 @layer base {
   * {
-    @apply border-black/5;
+    @apply border-white/5;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     touch-action: manipulation;
@@ -35,8 +35,8 @@
 }
 
 .glass-nav {
-  background: rgba(247, 248, 250, 0.8);
-  backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(0, 29, 61, 0.8);
+  backdrop-filter: blur(24px) saturate(180%);
 }
 
 .animate-reveal {
@@ -46,7 +46,7 @@
 @keyframes reveal {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.98);
+    transform: translateY(24px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -68,7 +68,7 @@
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-15px); }
+  50% { transform: translateY(-20px); }
 }
 
 .animate-float {
