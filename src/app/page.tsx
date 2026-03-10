@@ -4,20 +4,20 @@ import * as React from "react"
 import Image from "next/image"
 import { 
   ChevronRight, Star, Smartphone, Box, RotateCcw, Zap, 
-  QrCode, MessageCircle, Trophy, Timer, MousePointer2 
+  QrCode, MessageCircle, Trophy, Timer, MousePointer2, ArrowLeft
 } from "lucide-react"
 import { GlassButton } from "@/components/ma/GlassButton"
 import { cn } from "@/lib/utils"
-import { generateCouponCode, CouponRewards, saveGameSession } from "@/lib/coupon-service"
+import { CouponRewards, saveGameSession } from "@/lib/coupon-service"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 
 type AppState = 'hero' | 'choice' | 'game-box' | 'game-wheel' | 'game-speed' | 'result' | 'evaluation' | 'final'
 
 export default function MADiscovery() {
   const [state, setState] = React.useState<AppState>('hero')
-  const [reward, setReward] = React.useState<{ text: string, code: string } | null>(null)
+  const [reward, setReward] = React.useState<string | null>(null)
   
-  // Estados para os jogos
+  // Game States
   const [isSpinning, setIsSpinning] = React.useState(false)
   const [rotation, setRotation] = React.useState(0)
   const [speedScore, setSpeedScore] = React.useState(0)
@@ -34,19 +34,20 @@ export default function MADiscovery() {
   }
 
   const finalizeGame = (gameName: string) => {
-    const code = generateCouponCode()
     const prize = CouponRewards[Math.floor(Math.random() * CouponRewards.length)]
-    setReward({ text: prize, code })
-    saveGameSession(gameName, prize, code)
-    setState('result')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setReward(prize)
+    saveGameSession(gameName, prize)
+    setTimeout(() => {
+      setState('result')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }, 500)
   }
 
-  // --- Lógica Roda Tech ---
+  // --- Roda Tech Logic ---
   const spinWheel = () => {
     if (isSpinning) return
     setIsSpinning(true)
-    const newRotation = rotation + 1800 + Math.random() * 360
+    const newRotation = rotation + 1440 + Math.random() * 360
     setRotation(newRotation)
     setTimeout(() => {
       finalizeGame('Roda Tech')
@@ -54,7 +55,7 @@ export default function MADiscovery() {
     }, 4000)
   }
 
-  // --- Lógica Toque Rápido ---
+  // --- Toque Rápido Logic ---
   const startSpeedGame = () => {
     setSpeedScore(0)
     setTimeLeft(10)
@@ -87,71 +88,74 @@ export default function MADiscovery() {
   const iphoneImg = PlaceHolderImages.find(img => img.id === 'iphone-hero')
 
   return (
-    <main className="relative z-10 mx-auto max-w-7xl min-h-screen flex flex-col pb-20">
-      {/* Header */}
-      <nav className="p-6 md:p-10 flex justify-between items-center animate-fade-in shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
-            <Smartphone className="text-white w-6 h-6 md:w-10 md:h-10" />
+    <main className="relative z-10 mx-auto max-w-7xl min-h-screen flex flex-col pb-20 font-body antialiased">
+      {/* Navigation */}
+      <nav className="p-8 flex justify-between items-center animate-fade-in shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white text-background rounded-xl flex items-center justify-center shadow-sm">
+            <Smartphone className="w-6 h-6" />
           </div>
-          <span className="font-bold text-2xl md:text-4xl tracking-tighter">MA <span className="text-primary">Discovery</span></span>
+          <span className="font-bold text-2xl tracking-tight">MA <span className="opacity-50">Discovery</span></span>
         </div>
-        <div className="hidden md:block">
-           <div className="text-xs uppercase tracking-widest text-white/50 font-bold glass-dark px-6 py-4 rounded-full border-white/5">
-            PREMIUM EXPERIENCE
-          </div>
-        </div>
+        {state !== 'hero' && state !== 'final' && state !== 'result' && (
+          <button 
+            onClick={() => setState('choice')}
+            className="flex items-center gap-2 text-sm font-medium opacity-50 hover:opacity-100 transition-opacity"
+          >
+            <ArrowLeft className="w-4 h-4" /> Voltar
+          </button>
+        )}
       </nav>
 
-      <div className="relative flex-1 flex flex-col items-center justify-center py-10">
+      <div className="relative flex-1 flex flex-col items-center justify-center py-12">
         
         {/* HERO STATE */}
         {state === 'hero' && (
-          <div className="flex flex-col items-center text-center px-6 animate-fade-in max-w-4xl">
-            <div className="relative mb-8 md:mb-16 animate-float">
-              <div className="absolute inset-0 bg-primary/20 blur-[120px] rounded-full scale-150" />
-              <div className="relative w-[280px] h-[560px] md:w-[360px] md:h-[720px]">
+          <div className="flex flex-col items-center text-center px-6 animate-fade-in max-w-5xl">
+            <div className="relative mb-12 animate-float">
+              <div className="absolute inset-0 bg-primary/10 blur-[100px] rounded-full scale-125" />
+              <div className="relative w-[240px] h-[480px] md:w-[320px] md:h-[640px]">
                 <Image 
                   src={iphoneImg?.imageUrl || ""} 
                   alt="iPhone Premium"
                   fill
-                  className="object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.6)] rounded-[50px] border-[12px] border-white/5"
+                  className="object-contain drop-shadow-2xl"
                   priority
                 />
               </div>
             </div>
-            <h1 className="text-5xl md:text-9xl font-bold tracking-tighter mb-8 text-gradient leading-none">
-              Bem-vindo ao<br/>Amanhã.
+            <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-6 leading-[0.9]">
+              Pura Magia.<br/><span className="opacity-40">Em suas mãos.</span>
             </h1>
-            <p className="text-xl md:text-3xl text-muted-foreground mb-12 md:mb-16 font-light leading-relaxed max-w-2xl">
-              Descubra por que a MA Imports é a escolha número um em tecnologia premium.
+            <p className="text-xl md:text-2xl text-muted-foreground mb-12 font-medium max-w-2xl">
+              A experiência Apple elevada ao máximo pela MA Imports.
             </p>
-            <GlassButton size="xl" onClick={() => { setState('choice'); window.scrollTo(0,0); }} className="w-full max-w-md h-20 md:h-28 text-2xl md:text-3xl rounded-[40px]">
-              EXPERIMENTAR <ChevronRight className="ml-2 w-8 h-8 md:w-10 md:h-10" />
+            <GlassButton size="xl" onClick={() => setState('choice')} className="min-w-[280px] h-20 text-xl rounded-2xl shadow-xl">
+              Começar Desafio <ChevronRight className="ml-2 w-6 h-6" />
             </GlassButton>
           </div>
         )}
 
         {/* CHOICE STATE */}
         {state === 'choice' && (
-          <div className="w-full px-6 md:px-12 animate-fade-in">
-            <h2 className="text-4xl md:text-5xl font-bold mb-12 md:mb-20 text-center text-gradient">Qual desafio você aceita?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 max-w-6xl mx-auto">
+          <div className="w-full px-6 animate-fade-in max-w-5xl">
+            <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center tracking-tight">Escolha seu caminho.</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
-                { id: 'game-box', icon: Box, name: 'Caixa Premiada', desc: 'Sua intuição vale prêmios reais.', color: 'from-blue-500 to-cyan-500' },
-                { id: 'game-wheel', icon: RotateCcw, name: 'Roda Tech', desc: 'Gire e ganhe descontos exclusivos.', color: 'from-purple-500 to-pink-500' },
-                { id: 'game-speed', icon: Zap, name: 'Toque Rápido', desc: 'Teste seus reflexos em 10 segundos.', color: 'from-amber-400 to-orange-500' },
+                { id: 'game-box', icon: Box, name: 'Caixas', desc: 'Escolha uma das caixas surpresa.', color: 'bg-zinc-900' },
+                { id: 'game-wheel', icon: RotateCcw, name: 'Roleta', desc: 'Gire para ganhar benefícios.', color: 'bg-zinc-900' },
+                { id: 'game-speed', icon: Zap, name: 'Reflexo', desc: 'Teste sua agilidade em 10s.', color: 'bg-zinc-900' },
               ].map((game) => (
                 <button
                   key={game.id}
-                  onClick={() => { setState(game.id as any); window.scrollTo(0,0); }}
-                  className="glass-dark p-8 md:p-12 rounded-[40px] md:rounded-[60px] flex flex-col items-center text-center group hover:bg-white/10 transition-all duration-500 border-white/5 relative overflow-hidden"
+                  onClick={() => setState(game.id as any)}
+                  className="p-10 rounded-3xl bg-zinc-900/50 border border-white/5 flex flex-col items-center text-center group hover:bg-zinc-900 transition-all duration-300 shadow-sm"
                 >
-                  <div className={cn("w-20 h-20 md:w-28 md:h-28 rounded-[24px] md:rounded-[32px] flex items-center justify-center mb-6 md:mb-10 group-hover:scale-110 transition-transform duration-700 bg-gradient-to-br", game.color)}>
-                    <game.icon className="w-10 h-10 md:w-14 md:h-14 text-white" />
+                  <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-8 bg-zinc-800 border border-white/5 group-hover:scale-110 transition-transform duration-500">
+                    <game.icon className="w-10 h-10 text-white" />
                   </div>
-                  <h3 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">{game.name}</h3>
-                  <p className="text-lg md:text-xl text-muted-foreground font-light leading-relaxed">{game.desc}</p>
+                  <h3 className="text-2xl font-bold mb-3 tracking-tight">{game.name}</h3>
+                  <p className="text-muted-foreground leading-relaxed opacity-60">{game.desc}</p>
                 </button>
               ))}
             </div>
@@ -161,17 +165,17 @@ export default function MADiscovery() {
         {/* GAME: CAIXA PREMIADA */}
         {state === 'game-box' && (
           <div className="flex flex-col items-center animate-fade-in px-6">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gradient">Caixa Premiada</h2>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-16 md:mb-24 font-light text-center">Escolha a caixa que guarda sua sorte.</p>
-            <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+            <h2 className="text-4xl font-bold mb-4 tracking-tight">Caixa Premiada</h2>
+            <p className="text-xl text-muted-foreground mb-16 opacity-60">Escolha uma para revelar seu benefício.</p>
+            <div className="flex flex-wrap justify-center gap-8">
               {[0, 1, 2].map((i) => (
-                <div 
+                <button 
                   key={i} 
                   onClick={() => finalizeGame('Caixa Premiada')}
-                  className="w-40 h-40 md:w-56 md:h-56 glass-dark rounded-[40px] md:rounded-[50px] cursor-pointer transition-all duration-500 hover:scale-110 active:scale-90 flex items-center justify-center group hover:border-primary/50"
+                  className="w-48 h-48 md:w-56 md:h-56 bg-zinc-900/80 rounded-[40px] border border-white/5 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center group"
                 >
-                  <Box className="w-16 h-16 md:w-24 md:h-24 text-primary group-hover:text-accent group-hover:rotate-12 transition-all duration-500" />
-                </div>
+                  <Box className="w-20 h-20 text-white opacity-20 group-hover:opacity-100 transition-opacity" />
+                </button>
               ))}
             </div>
           </div>
@@ -179,61 +183,61 @@ export default function MADiscovery() {
 
         {/* GAME: RODA TECH */}
         {state === 'game-wheel' && (
-          <div className="flex flex-col items-center animate-fade-in relative px-6">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gradient">Roda Tech</h2>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-12 md:mb-20 font-light text-center">Gire a roleta da tecnologia premium.</p>
+          <div className="flex flex-col items-center animate-fade-in px-6">
+            <h2 className="text-4xl font-bold mb-4 tracking-tight">Roda Tech</h2>
+            <p className="text-xl text-muted-foreground mb-16 opacity-60">Gire a roleta premium.</p>
             
-            <div className="relative mb-12 md:mb-20">
+            <div className="relative mb-16">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 z-20">
-                <div className="w-6 h-10 md:w-8 md:h-12 bg-accent rounded-full border-4 border-white shadow-xl" />
+                <div className="w-6 h-10 bg-white rounded-full border-4 border-zinc-900 shadow-xl" />
               </div>
               <div 
-                className="w-64 h-64 md:w-[450px] md:h-[450px] rounded-full border-[10px] md:border-[15px] border-white/10 glass-dark shadow-[0_0_100px_rgba(46,151,245,0.2)] transition-transform duration-[4000ms] ease-out flex items-center justify-center overflow-hidden"
+                className="w-72 h-72 md:w-[420px] md:h-[420px] rounded-full border-8 border-white/5 bg-zinc-900 shadow-2xl transition-transform duration-[4000ms] ease-out flex items-center justify-center overflow-hidden"
                 style={{ transform: `rotate(${rotation}deg)` }}
               >
-                <div className="grid grid-cols-2 grid-rows-2 w-full h-full rotate-45">
-                   <div className="bg-primary/20 border-white/5 flex items-center justify-center"><Star className="w-10 h-10 md:w-12 md:h-12 -rotate-45" /></div>
-                   <div className="bg-accent/20 border-white/5 flex items-center justify-center"><Smartphone className="w-10 h-10 md:w-12 md:h-12 -rotate-45" /></div>
-                   <div className="bg-white/5 border-white/5 flex items-center justify-center"><Zap className="w-10 h-10 md:w-12 md:h-12 -rotate-45" /></div>
-                   <div className="bg-primary/40 border-white/5 flex items-center justify-center"><Trophy className="w-10 h-10 md:w-12 md:h-12 -rotate-45" /></div>
+                <div className="grid grid-cols-2 grid-rows-2 w-full h-full rotate-45 opacity-40">
+                   <div className="border-r border-b border-white/5 flex items-center justify-center"><Star className="w-12 h-12 -rotate-45" /></div>
+                   <div className="border-l border-b border-white/5 flex items-center justify-center"><Smartphone className="w-12 h-12 -rotate-45" /></div>
+                   <div className="border-r border-t border-white/5 flex items-center justify-center"><Zap className="w-12 h-12 -rotate-45" /></div>
+                   <div className="border-l border-t border-white/5 flex items-center justify-center"><Trophy className="w-12 h-12 -rotate-45" /></div>
                 </div>
               </div>
             </div>
 
-            <GlassButton size="xl" onClick={spinWheel} disabled={isSpinning} className="w-64 md:w-72 h-20 md:h-24 text-xl md:text-2xl">
-              {isSpinning ? 'GIRANDO...' : 'GIRAR AGORA'}
+            <GlassButton size="lg" onClick={spinWheel} disabled={isSpinning} className="min-w-[240px] h-16 rounded-2xl font-bold">
+              {isSpinning ? 'Girando...' : 'Girar'}
             </GlassButton>
           </div>
         )}
 
         {/* GAME: TOQUE RÁPIDO */}
         {state === 'game-speed' && (
-          <div className="flex flex-col items-center w-full px-6 animate-fade-in">
+          <div className="flex flex-col items-center w-full px-6 animate-fade-in max-w-4xl">
             {!speedActive && speedScore === 0 ? (
               <div className="text-center">
-                <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gradient">Toque Rápido</h2>
-                <p className="text-xl md:text-2xl text-muted-foreground mb-12 md:mb-16 font-light">Toque no maior número de ícones em 10 segundos.</p>
-                <GlassButton size="xl" onClick={startSpeedGame} className="w-64 md:w-72 h-20 md:h-24 text-xl md:text-2xl">COMEÇAR</GlassButton>
+                <h2 className="text-4xl font-bold mb-4 tracking-tight">Toque Rápido</h2>
+                <p className="text-xl text-muted-foreground mb-12 opacity-60">Toque no maior número de iPhones em 10 segundos.</p>
+                <GlassButton size="lg" onClick={startSpeedGame} className="min-w-[240px] h-16 rounded-2xl">Começar</GlassButton>
               </div>
             ) : (
-              <div className="relative w-full aspect-square md:aspect-video max-w-4xl glass-dark rounded-[40px] md:rounded-[60px] overflow-hidden min-h-[400px]">
-                <div className="absolute top-6 md:top-10 left-1/2 -translate-x-1/2 flex gap-8 md:gap-12 z-20">
+              <div className="relative w-full aspect-square md:aspect-video bg-zinc-900/50 border border-white/5 rounded-[40px] overflow-hidden min-h-[400px] shadow-2xl">
+                <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-16 z-20">
                   <div className="flex flex-col items-center">
-                    <span className="text-[10px] md:text-xs uppercase tracking-widest opacity-50 mb-1 md:mb-2">TEMPO</span>
-                    <div className="text-3xl md:text-5xl font-bold flex items-center gap-2 md:gap-3"><Timer className="w-6 h-6 md:w-8 md:h-8 text-primary" /> {timeLeft}s</div>
+                    <span className="text-[10px] uppercase tracking-widest opacity-40 mb-1">Tempo</span>
+                    <div className="text-4xl font-bold flex items-center gap-2"> {timeLeft}s</div>
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="text-[10px] md:text-xs uppercase tracking-widest opacity-50 mb-1 md:mb-2">PONTOS</span>
-                    <div className="text-3xl md:text-5xl font-bold flex items-center gap-2 md:gap-3"><MousePointer2 className="w-6 h-6 md:w-8 md:h-8 text-accent" /> {speedScore}</div>
+                    <span className="text-[10px] uppercase tracking-widest opacity-40 mb-1">Pontos</span>
+                    <div className="text-4xl font-bold flex items-center gap-2"> {speedScore}</div>
                   </div>
                 </div>
                 
                 <button
                   onClick={handleTargetHit}
-                  className="absolute w-20 h-20 md:w-28 md:h-28 bg-primary rounded-full shadow-[0_0_40px_rgba(46,151,245,0.6)] animate-pulse flex items-center justify-center transition-all duration-150 active:scale-125"
+                  className="absolute w-24 h-24 bg-white text-background rounded-3xl shadow-2xl animate-pulse flex items-center justify-center transition-all duration-100 active:scale-125"
                   style={{ top: targetPos.top, left: targetPos.left }}
                 >
-                  <Smartphone className="w-10 h-10 md:w-12 md:h-12 text-white" />
+                  <Smartphone className="w-12 h-12" />
                 </button>
               </div>
             )}
@@ -242,42 +246,40 @@ export default function MADiscovery() {
 
         {/* RESULT STATE */}
         {state === 'result' && (
-          <div className="flex flex-col items-center text-center px-6 animate-scale-in">
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-accent/20 flex items-center justify-center mb-10 md:shadow-[0_0_60px_rgba(201,162,74,0.3)]">
-              <Trophy className="w-16 h-16 md:w-20 md:h-20 text-accent" />
+          <div className="flex flex-col items-center text-center px-6 animate-scale-in max-w-3xl">
+            <div className="w-24 h-24 rounded-3xl bg-white text-background flex items-center justify-center mb-12 shadow-2xl">
+              <Trophy className="w-12 h-12" />
             </div>
-            <h2 className="text-4xl md:text-6xl font-bold mb-4 md:mb-6 text-gradient">Parabéns!</h2>
-            <p className="text-2xl md:text-3xl text-muted-foreground mb-12 md:mb-20 font-light">{reward?.text}</p>
+            <h2 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">Incrível.</h2>
+            <p className="text-2xl md:text-3xl font-medium opacity-60 mb-16">Você conquistou:</p>
             
-            <div className="glass-dark px-10 md:px-24 py-10 md:py-16 rounded-[40px] md:rounded-[60px] border-accent/20 mb-12 md:mb-20 relative overflow-hidden w-full max-w-2xl">
-              <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-transparent via-accent to-transparent" />
-              <span className="text-sm md:text-lg uppercase tracking-[0.3em] md:tracking-[0.5em] text-accent font-bold mb-6 md:mb-8 block opacity-70">CÓDIGO DE RESGATE</span>
-              <span className="text-5xl md:text-8xl font-bold font-mono tracking-widest text-white break-all">{reward?.code}</span>
+            <div className="bg-white text-background px-12 py-10 rounded-[40px] mb-16 shadow-2xl w-full">
+              <h3 className="text-3xl md:text-5xl font-bold tracking-tight leading-tight">{reward}</h3>
             </div>
 
-            <GlassButton size="xl" onClick={() => { setState('evaluation'); window.scrollTo(0,0); }} className="w-full max-w-[400px] h-20 md:h-24 text-xl md:text-2xl">
-              CONTINUAR
+            <GlassButton size="lg" onClick={() => setState('evaluation')} className="min-w-[280px] h-16 rounded-2xl">
+              Próximo Passo <ChevronRight className="ml-2 w-6 h-6" />
             </GlassButton>
           </div>
         )}
 
         {/* EVALUATION STATE */}
         {state === 'evaluation' && (
-          <div className="flex flex-col items-center text-center px-6 animate-fade-in max-w-3xl">
-            <h2 className="text-4xl md:text-6xl font-bold mb-8 md:mb-10 leading-tight">Gostou de<br/>jogar conosco?</h2>
-            <p className="text-xl md:text-3xl text-muted-foreground mb-12 md:mb-20 font-light leading-relaxed">
-              Sua avaliação no Google fortalece nossa presença e nos ajuda a trazer mais novidades exclusivas para você.
+          <div className="flex flex-col items-center text-center px-6 animate-fade-in max-w-2xl">
+            <h2 className="text-5xl md:text-6xl font-bold mb-8 tracking-tight leading-[1.1]">Conte sua<br/>experiência.</h2>
+            <p className="text-xl md:text-2xl text-muted-foreground mb-16 font-medium leading-relaxed opacity-60">
+              Sua avaliação nos ajuda a manter o padrão premium MA Imports.
             </p>
             
-            <div className="flex flex-col gap-6 w-full max-w-lg">
-              <GlassButton variant="gold" size="xl" className="w-full h-24 md:h-28 flex gap-4 text-2xl md:text-3xl shadow-[0_30px_60px_rgba(201,162,74,0.2)]">
-                <Star className="w-8 h-8 md:w-10 md:h-10 fill-current" /> AVALIAR NO GOOGLE
+            <div className="flex flex-col gap-6 w-full">
+              <GlassButton variant="primary" size="lg" className="w-full h-20 text-xl rounded-2xl bg-white text-background hover:bg-zinc-200">
+                <Star className="w-6 h-6 fill-current" /> Avaliar no Google
               </GlassButton>
               <button 
-                onClick={() => { setState('final'); window.scrollTo(0,0); }}
-                className="text-xl md:text-2xl text-muted-foreground hover:text-white transition-colors py-4 font-light underline underline-offset-8"
+                onClick={() => setState('final')}
+                className="text-lg opacity-40 hover:opacity-100 transition-opacity py-4 font-medium"
               >
-                Talvez mais tarde
+                Pular
               </button>
             </div>
           </div>
@@ -285,30 +287,31 @@ export default function MADiscovery() {
 
         {/* FINAL STATE */}
         {state === 'final' && (
-          <div className="flex flex-col items-center text-center px-6 animate-fade-in">
-            <div className="glass-dark p-8 md:p-12 rounded-[50px] md:rounded-[70px] mb-12 shadow-2xl">
-              <div className="bg-white p-6 md:p-10 rounded-[30px] md:rounded-[40px]">
-                <QrCode className="w-56 h-56 md:w-72 md:h-72 text-background" />
-              </div>
+          <div className="flex flex-col items-center text-center px-6 animate-fade-in max-w-2xl">
+            <div className="bg-white p-10 rounded-[50px] mb-16 shadow-2xl">
+              <QrCode className="w-64 h-64 text-background" />
             </div>
             
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 md:mb-8 text-gradient">Acesse o Catálogo</h2>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-12 md:mb-20 font-light">Escaneie o código acima ou chame um consultor agora.</p>
+            <h2 className="text-5xl font-bold mb-6 tracking-tight">Catálogo Digital.</h2>
+            <p className="text-xl text-muted-foreground mb-16 font-medium opacity-60">Escaneie para explorar todos os nossos produtos.</p>
 
-            <div className="flex flex-col gap-6 w-full max-w-xl">
-              <GlassButton className="bg-[#25D366] hover:bg-[#20ba59] border-none h-20 md:h-24 text-xl md:text-2xl shadow-[0_20px_40px_rgba(37,211,102,0.2)]">
-                <MessageCircle className="w-8 h-8 fill-current" /> CHAMAR NO WHATSAPP
+            <div className="flex flex-col gap-6 w-full">
+              <GlassButton className="bg-[#25D366] hover:bg-[#20ba59] border-none h-20 text-xl rounded-2xl text-white shadow-lg">
+                <MessageCircle className="w-6 h-6 fill-current" /> Falar com Especialista
               </GlassButton>
-              <GlassButton variant="secondary" className="h-20 md:h-24 text-xl md:text-2xl" onClick={resetToHero}>
-                REINICIAR TUDO
-              </GlassButton>
+              <button 
+                onClick={resetToHero}
+                className="text-lg opacity-40 hover:opacity-100 transition-opacity py-4 font-medium"
+              >
+                Voltar ao Início
+              </button>
             </div>
           </div>
         )}
       </div>
 
-      <footer className="p-10 text-center text-muted-foreground/30 text-sm md:text-lg tracking-widest font-medium uppercase shrink-0">
-        MA IMPORTS © {new Date().getFullYear()} — TECNOLOGIA PREMIUM E SEGURA
+      <footer className="p-12 text-center text-xs tracking-[0.3em] font-bold uppercase opacity-20 shrink-0">
+        MA IMPORTS — Premium Quality Since 2012
       </footer>
     </main>
   )

@@ -3,7 +3,6 @@ export interface SessionData {
   timestamp: number;
   game: string;
   reward: string;
-  coupon: string;
   evaluated: boolean;
 }
 
@@ -16,16 +15,7 @@ export const CouponRewards = [
   "Upgrade de Memória Exclusivo"
 ];
 
-export function generateCouponCode() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 4; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return `MA-${result}`;
-}
-
-export function saveGameSession(game: string, reward: string, coupon: string) {
+export function saveGameSession(game: string, reward: string) {
   if (typeof window === 'undefined') return;
   
   const session: SessionData = {
@@ -33,7 +23,6 @@ export function saveGameSession(game: string, reward: string, coupon: string) {
     timestamp: Date.now(),
     game,
     reward,
-    coupon,
     evaluated: false
   };
 
@@ -45,7 +34,7 @@ export function saveGameSession(game: string, reward: string, coupon: string) {
 }
 
 export function getStats() {
-  if (typeof window === 'undefined') return { total: 0, rewards: {} };
+  if (typeof window === 'undefined') return { total: 0, today: 0, sessions: [] };
   
   const sessions: SessionData[] = JSON.parse(localStorage.getItem('ma_sessions') || '[]');
   return {
