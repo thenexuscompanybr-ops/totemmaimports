@@ -11,6 +11,12 @@
       "description": "MA Imports Logo Dourada",
       "imageUrl": "https://i.imgur.com/MmmzHL1.png",
       "imageHint": "luxury logo"
+    },
+    {
+      "id": "google-qr",
+      "description": "QR Code Oficial de Avaliação Google MA Imports",
+      "imageUrl": "https://i.imgur.com/qMKGah3.png",
+      "imageHint": "qr code google"
     }
   ]
 }

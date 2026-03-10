@@ -1,10 +1,11 @@
+
 "use client"
 
 import * as React from "react"
 import Image from "next/image"
 import { 
   ChevronRight, Box, RotateCcw, Zap, 
-  QrCode, Star, Trophy, ArrowLeft, Gift, 
+  Star, Trophy, ArrowLeft, Gift, 
   Smartphone
 } from "lucide-react"
 import { GlassButton } from "@/components/ma/GlassButton"
@@ -24,7 +25,7 @@ export default function TotemExperience() {
   const [rotation, setRotation] = React.useState(0)
   const [speedScore, setSpeedScore] = React.useState(0)
   const [speedActive, setSpeedActive] = React.useState(false)
-  const [timeLeft, setTimeLeft] = React.useState(10)
+  const [timeLeft, setTimeLeft] = React.useState(5)
   const [targetPos, setTargetPos] = React.useState({ top: '50%', left: '50%' })
   const [selectedBox, setSelectedBox] = React.useState<number | null>(null)
 
@@ -33,6 +34,7 @@ export default function TotemExperience() {
   const [flippedCards, setFlippedCards] = React.useState<number[]>([])
 
   const maLogo = PlaceHolderImages.find(img => img.id === 'ma-logo')?.imageUrl || ""
+  const qrImage = PlaceHolderImages.find(img => img.id === 'google-qr')?.imageUrl || ""
 
   const resetToHero = React.useCallback(() => {
     setState('hero')
@@ -80,24 +82,15 @@ export default function TotemExperience() {
   // Improved Wheel Logic
   const startSpinning = () => {
     setSpinPhase('spinning')
-    // Reset rotation slightly to keep the math clean if needed
     setRotation(r => r % 360)
   }
 
   const stopSpinning = () => {
     setSpinPhase('stopping')
-    
-    // Pick a random reward index (0-7)
     const prizeIndex = Math.floor(Math.random() * CouponRewards.length)
     const selectedPrize = CouponRewards[prizeIndex]
-    
-    // Each slice is 45 degrees. 
-    // To land on slice X (0-indexed), we need to rotate to (360 - (X * 45)) degrees
-    // We add multiple full rotations (e.g., 5 * 360) for effect
     const sliceAngle = 360 / CouponRewards.length
-    const offset = sliceAngle / 2 // Offset to land in the middle of the slice
     const targetRotation = 360 - (prizeIndex * sliceAngle)
-    
     const finalRotation = rotation + (360 * 5) + targetRotation - (rotation % 360)
     setRotation(finalRotation)
     
@@ -109,7 +102,7 @@ export default function TotemExperience() {
   // Speed Game Logic
   const startSpeedGame = () => {
     setSpeedScore(0)
-    setTimeLeft(10)
+    setTimeLeft(5)
     setSpeedActive(true)
     moveTarget()
   }
@@ -188,7 +181,6 @@ export default function TotemExperience() {
   return (
     <main className="fixed inset-0 w-screen h-screen flex flex-col overflow-hidden select-none transition-all duration-700 ease-in-out bg-[#001D3D] bg-gradient-to-br from-[#001D3D] via-[#000814] to-[#000000]">
       
-      {/* Header - Only if not hero */}
       {state !== 'hero' && (
         <header className="h-24 px-12 flex justify-between items-center z-50 glass-nav border-b border-white/5 animate-reveal">
           <div className="flex items-center gap-4 cursor-pointer" onClick={resetToHero}>
@@ -211,7 +203,6 @@ export default function TotemExperience() {
 
       <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden p-8 md:p-12">
         
-        {/* SCREEN 1: HERO */}
         {state === 'hero' && (
           <div className="flex flex-col items-center text-center animate-reveal max-w-6xl">
             <div className="relative w-40 h-40 mb-12 animate-float">
@@ -238,7 +229,6 @@ export default function TotemExperience() {
           </div>
         )}
 
-        {/* SCREEN: CHOICE */}
         {state === 'choice' && (
           <div className="w-full max-w-4xl animate-reveal text-center">
             <h2 className="text-3xl md:text-4xl font-black mb-12 tracking-tighter text-white uppercase">Escolha seu desafio</h2>
@@ -265,9 +255,8 @@ export default function TotemExperience() {
           </div>
         )}
 
-        {/* GAME: BOX SURPRISE */}
         {state === 'game-box' && (
-          <div className="w-full max-w-4xl animate-reveal text-center">
+          <div className="w-full max-w-3xl animate-reveal text-center">
             <h2 className="text-3xl font-black mb-16 text-white/20 uppercase tracking-widest">Selecione uma caixa</h2>
             <div className="grid grid-cols-3 gap-8">
               {[0, 1, 2].map((i) => (
@@ -279,24 +268,23 @@ export default function TotemExperience() {
                     selectedBox === i && "border-[#C5A059] scale-95 shadow-[0_0_80px_rgba(197,160,89,0.2)]"
                   )}
                 >
-                  <Gift className="w-20 h-20 text-[#C5A059]/30" />
+                  <Gift className="w-16 h-16 text-[#C5A059]/30" />
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* GAME: ROLETA TECH */}
         {state === 'game-wheel' && (
           <div className="flex flex-col items-center animate-reveal">
             <div className="relative mb-12">
               <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-40">
-                <div className="w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-t-[50px] border-t-[#C5A059] filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]" />
+                <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[40px] border-t-[#C5A059] filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]" />
               </div>
-              <div className="p-8 bg-white/5 rounded-full border border-white/10 backdrop-blur-3xl relative">
+              <div className="p-6 bg-white/5 rounded-full border border-white/10 backdrop-blur-3xl relative">
                 <div 
                   className={cn(
-                    "w-[500px] h-[500px] md:w-[650px] md:h-[650px] rounded-full bg-white/5 relative transition-transform duration-[3200ms] ease-[cubic-bezier(0.15,0,0.1,1)] flex items-center justify-center overflow-hidden border-4 border-[#C5A059]/20",
+                    "w-[450px] h-[450px] md:w-[600px] md:h-[600px] rounded-full bg-white/5 relative transition-transform duration-[3200ms] ease-[cubic-bezier(0.15,0,0.1,1)] flex items-center justify-center overflow-hidden border-4 border-[#C5A059]/20",
                     spinPhase === 'spinning' && "animate-[spin_1s_linear_infinite]"
                   )}
                   style={{ transform: spinPhase === 'stopping' ? `rotate(${rotation}deg)` : undefined }}
@@ -312,15 +300,15 @@ export default function TotemExperience() {
                       }} 
                     >
                        <div 
-                        className="absolute top-12 left-1/2 -translate-x-1/2 text-white font-black text-xs md:text-sm uppercase tracking-tighter text-center max-w-[120px]"
+                        className="absolute top-12 left-1/2 -translate-x-1/2 text-white font-black text-xs md:text-sm uppercase tracking-tighter text-center max-w-[100px]"
                         style={{ transform: 'rotate(0deg)' }}
                        >
                          {prize}
                        </div>
                     </div>
                   ))}
-                  <div className="absolute z-30 w-32 h-32 bg-[#001D3D] rounded-full shadow-[0_0_80px_rgba(0,0,0,0.8)] border-4 border-[#C5A059] flex items-center justify-center">
-                    <div className="relative w-16 h-16">
+                  <div className="absolute z-30 w-28 h-28 bg-[#001D3D] rounded-full shadow-[0_0_80px_rgba(0,0,0,0.8)] border-4 border-[#C5A059] flex items-center justify-center">
+                    <div className="relative w-14 h-14">
                       <Image src={maLogo} alt="MA Logo" fill className="object-contain" />
                     </div>
                   </div>
@@ -354,27 +342,26 @@ export default function TotemExperience() {
           </div>
         )}
 
-        {/* GAME: SPEED TOUCH */}
         {state === 'game-speed' && (
-          <div className="w-full max-w-5xl animate-reveal flex flex-col items-center">
+          <div className="w-full max-w-4xl animate-reveal flex flex-col items-center">
             {!speedActive && speedScore === 0 ? (
               <div className="text-center">
-                <h2 className="text-5xl font-black mb-12 text-white uppercase tracking-tighter">Desafio de Reflexo</h2>
-                <GlassButton variant="gold" onClick={startSpeedGame} className="min-w-[400px]">COMEÇAR (10S)</GlassButton>
+                <h2 className="text-4xl font-black mb-12 text-white uppercase tracking-tighter">Desafio de Reflexo</h2>
+                <GlassButton variant="gold" onClick={startSpeedGame} className="min-w-[350px]">COMEÇAR (5S)</GlassButton>
               </div>
             ) : (
               <div className="w-full flex flex-col items-center">
-                <div className="flex justify-between w-full mb-12">
-                  <div className="text-2xl font-black text-white/20 uppercase tracking-[0.2em]">Tempo: {timeLeft}s</div>
-                  <div className="text-2xl font-black uppercase tracking-[0.2em] text-[#C5A059]">Score: {speedScore}</div>
+                <div className="flex justify-between w-full mb-8">
+                  <div className="text-xl font-black text-white/20 uppercase tracking-[0.2em]">Tempo: {timeLeft}s</div>
+                  <div className="text-xl font-black uppercase tracking-[0.2em] text-[#C5A059]">Score: {speedScore}</div>
                 </div>
-                <div className="relative w-full aspect-[16/9] bg-white/5 border border-white/10 rounded-[64px] overflow-hidden backdrop-blur-3xl shadow-inner">
+                <div className="relative w-full aspect-[16/9] bg-white/5 border border-white/10 rounded-[48px] overflow-hidden backdrop-blur-3xl shadow-inner max-w-3xl">
                   <button
                     onClick={handleTargetHit}
-                    className="absolute w-24 h-24 bg-[#C5A059] text-[#001D3D] rounded-[24px] shadow-[0_20px_40px_rgba(197,160,89,0.3)] flex items-center justify-center transition-all duration-100 active:scale-125"
+                    className="absolute w-20 h-20 bg-[#C5A059] text-[#001D3D] rounded-[24px] shadow-[0_20px_40px_rgba(197,160,89,0.3)] flex items-center justify-center transition-all duration-100 active:scale-125"
                     style={{ top: targetPos.top, left: targetPos.left }}
                   >
-                    <Smartphone className="w-10 h-10 fill-current" />
+                    <Smartphone className="w-8 h-8 fill-current" />
                   </button>
                 </div>
               </div>
@@ -382,24 +369,23 @@ export default function TotemExperience() {
           </div>
         )}
 
-        {/* GAME: MEMORY */}
         {state === 'game-memory' && (
-          <div className="w-full max-w-4xl animate-reveal text-center">
-            <h2 className="text-3xl font-black mb-12 text-white/20 uppercase tracking-widest">Encontre os pares</h2>
-            <div className="grid grid-cols-4 gap-6">
+          <div className="w-full max-w-3xl animate-reveal text-center">
+            <h2 className="text-2xl font-black mb-12 text-white/20 uppercase tracking-widest">Encontre os pares</h2>
+            <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto">
               {memoryCards.map((card) => (
                 <button
                   key={card.id}
                   onClick={() => handleCardClick(card.id)}
                   className={cn(
-                    "aspect-square rounded-[32px] border border-white/10 flex items-center justify-center transition-all duration-500 transform perspective-1000",
+                    "aspect-square rounded-[24px] border border-white/10 flex items-center justify-center transition-all duration-500 transform perspective-1000",
                     card.isFlipped || card.isMatched ? "bg-white/10 rotate-y-0" : "bg-white/5 rotate-y-180 backdrop-blur-xl"
                   )}
                 >
                   {(card.isFlipped || card.isMatched) ? (
-                    <card.icon className="w-12 h-12 text-[#C5A059]" />
+                    <card.icon className="w-10 h-10 text-[#C5A059]" />
                   ) : (
-                    <div className="w-12 h-12 bg-[#C5A059]/10 rounded-full" />
+                    <div className="w-10 h-10 bg-[#C5A059]/10 rounded-full" />
                   )}
                 </button>
               ))}
@@ -407,50 +393,54 @@ export default function TotemExperience() {
           </div>
         )}
 
-        {/* SCREEN 3: RESULT */}
         {state === 'result' && (
           <div className="flex flex-col items-center text-center animate-reveal">
-            <div className="w-24 h-24 rounded-[24px] bg-[#C5A059] flex items-center justify-center mb-8 shadow-[0_20px_40px_rgba(197,160,89,0.3)] animate-float">
-              <Trophy className="w-12 h-12 text-[#001D3D]" />
+            <div className="w-20 h-20 rounded-[20px] bg-[#C5A059] flex items-center justify-center mb-8 shadow-[0_20px_40px_rgba(197,160,89,0.3)] animate-float">
+              <Trophy className="w-10 h-10 text-[#001D3D]" />
             </div>
             <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tighter text-white uppercase">Excelente!</h2>
             <p className="text-sm uppercase tracking-[0.4em] font-black text-white/30 mb-8">Seu benefício exclusivo é:</p>
-            <div className="bg-white/5 border border-[#C5A059]/30 px-10 py-8 rounded-[40px] backdrop-blur-3xl mb-12 shadow-2xl max-w-xl">
-               <h3 className="text-3xl md:text-4xl font-black tracking-tighter text-[#C5A059] uppercase leading-tight">{reward}</h3>
+            <div className="bg-white/5 border border-[#C5A059]/30 px-8 py-6 rounded-[32px] backdrop-blur-3xl mb-12 shadow-2xl max-w-lg">
+               <h3 className="text-2xl md:text-3xl font-black tracking-tighter text-[#C5A059] uppercase leading-tight">{reward}</h3>
             </div>
-            <GlassButton variant="gold" onClick={() => setState('google-incentive')} className="w-full max-w-lg">
+            <GlassButton variant="gold" onClick={() => setState('google-incentive')} className="w-full max-w-md">
               RESGATAR <ChevronRight className="w-8 h-8" />
             </GlassButton>
           </div>
         )}
 
-        {/* SCREEN 4: GOOGLE INCENTIVE */}
         {state === 'google-incentive' && (
           <div className="flex flex-col items-center text-center animate-reveal">
             <div className="flex gap-3 mb-12">
-              {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-12 h-12 fill-[#C5A059] text-[#C5A059] animate-reveal" style={{ animationDelay: `${i*100}ms` }} />)}
+              {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-10 h-10 fill-[#C5A059] text-[#C5A059] animate-reveal" style={{ animationDelay: `${i*100}ms` }} />)}
             </div>
             <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-tighter text-white uppercase">Avalie sua experiência</h2>
-            <p className="text-2xl text-white/40 font-medium mb-16 max-w-3xl leading-relaxed">
+            <p className="text-xl text-white/40 font-medium mb-16 max-w-2xl leading-relaxed">
               Sua avaliação ajuda a MA Imports a oferecer serviços cada vez melhores.
             </p>
-            <GlassButton variant="gold" onClick={() => setState('qr-code')} className="w-full max-w-xl">
+            <GlassButton variant="gold" onClick={() => setState('qr-code')} className="w-full max-w-lg">
               AVALIAR AGORA
             </GlassButton>
           </div>
         )}
 
-        {/* SCREEN 5: QR CODE */}
         {state === 'qr-code' && (
           <div className="flex flex-col items-center text-center animate-reveal">
-            <div className="bg-white p-12 rounded-[64px] mb-12 shadow-[0_40px_80px_rgba(0,0,0,0.5)] animate-reveal">
-              <QrCode className="w-64 h-64 text-[#001D3D]" />
+            <div className="bg-white p-8 rounded-[48px] mb-12 shadow-[0_40px_80px_rgba(0,0,0,0.5)] animate-reveal">
+              <div className="relative w-64 h-64">
+                <Image 
+                  src={qrImage} 
+                  alt="QR Code Google Review" 
+                  fill 
+                  className="object-contain"
+                />
+              </div>
             </div>
-            <h2 className="text-4xl font-black mb-6 tracking-tighter text-white uppercase">Escaneie para avaliar</h2>
-            <p className="text-xl text-white/30 font-black uppercase tracking-[0.3em] mb-16">
+            <h2 className="text-3xl font-black mb-4 tracking-tighter text-white uppercase">Escaneie para avaliar</h2>
+            <p className="text-sm text-white/30 font-black uppercase tracking-[0.3em] mb-16">
               Obrigado pela preferência!
             </p>
-            <div className="text-lg font-black text-[#C5A059]/40 uppercase tracking-[0.2em] animate-pulse">
+            <div className="text-xs font-black text-[#C5A059]/40 uppercase tracking-[0.2em] animate-pulse">
               Reiniciando totem em instantes...
             </div>
           </div>
@@ -458,7 +448,6 @@ export default function TotemExperience() {
 
       </div>
 
-      {/* Footer */}
       <footer className="h-20 px-12 flex justify-center items-center border-t border-white/5 bg-black/40 backdrop-blur-md">
         <span className="text-xs tracking-[1em] font-black uppercase text-white/10">
           MA IMPORTS — PREMIUM KIOSK
