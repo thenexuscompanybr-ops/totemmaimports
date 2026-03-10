@@ -170,26 +170,26 @@ export default function TotemExperience() {
   return (
     <main className="fixed inset-0 w-screen h-screen flex flex-col overflow-hidden select-none transition-all duration-700 ease-in-out bg-[#001D3D] bg-gradient-to-br from-[#001D3D] via-[#000814] to-[#000000]">
       
-      {/* Header Fixo */}
-      <header className="h-28 px-12 flex justify-between items-center z-50 glass-nav border-b border-white/5">
-        <div className="flex items-center gap-6 cursor-pointer" onClick={resetToHero}>
-          <div className="relative w-20 h-20">
-            <Image 
-              src={maLogo} 
-              alt="MA Imports Logo" 
-              fill 
-              className="object-contain"
-              priority
-            />
+      {/* Header Fixo - Apenas se não estiver na tela inicial */}
+      {state !== 'hero' && (
+        <header className="h-28 px-12 flex justify-between items-center z-50 glass-nav border-b border-white/5 animate-reveal">
+          <div className="flex items-center gap-6 cursor-pointer" onClick={resetToHero}>
+            <div className="relative w-20 h-20">
+              <Image 
+                src={maLogo} 
+                alt="MA Imports Logo" 
+                fill 
+                className="object-contain"
+                priority
+              />
+            </div>
+            <span className="text-3xl font-extrabold tracking-tight text-white uppercase">MA Discovery</span>
           </div>
-          <span className="text-3xl font-extrabold tracking-tight text-white uppercase">MA Discovery</span>
-        </div>
-        {state !== 'hero' && (
           <button onClick={resetToHero} className="flex items-center gap-3 text-xl font-black text-white/40 active:text-white transition-colors uppercase tracking-widest">
             <ArrowLeft className="w-6 h-6" /> Início
           </button>
-        )}
-      </header>
+        </header>
+      )}
 
       <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden p-12">
         
