@@ -4,13 +4,13 @@ import * as React from "react"
 import { 
   ChevronRight, Box, RotateCcw, Zap, 
   QrCode, Star, Trophy, ArrowLeft, Gift, 
-  Smartphone, Monitor
+  Smartphone
 } from "lucide-react"
 import { GlassButton } from "@/components/ma/GlassButton"
 import { CouponRewards, saveGameSession } from "@/lib/coupon-service"
 import { cn } from "@/lib/utils"
 
-type AppState = 'hero' | 'choice' | 'game-box' | 'game-wheel' | 'game-speed' | 'result' | 'google-incentive' | 'qr-code'
+type AppState = 'hero' | 'choice' | 'game-box' | 'game-wheel' | 'game-speed' | 'game-memory' | 'result' | 'google-incentive' | 'qr-code'
 
 export default function TotemExperience() {
   const [state, setState] = React.useState<AppState>('hero')
@@ -21,9 +21,13 @@ export default function TotemExperience() {
   const [rotation, setRotation] = React.useState(0)
   const [speedScore, setSpeedScore] = React.useState(0)
   const [speedActive, setSpeedActive] = React.useState(false)
-  const [timeLeft, setTimeLeft] = React.useState(5) // Fast 5s game
+  const [timeLeft, setTimeLeft] = React.useState(5)
   const [targetPos, setTargetPos] = React.useState({ top: '50%', left: '50%' })
   const [selectedBox, setSelectedBox] = React.useState<number | null>(null)
+
+  // Memory Game State
+  const [memoryCards, setMemoryCards] = React.useState<{id: number, icon: any, isFlipped: boolean, isMatched: boolean}[]>([])
+  const [flippedCards, setFlippedCards] = React.useState<number[]>([])
 
   const resetToHero = React.useCallback(() => {
     setState('hero')
@@ -32,10 +36,11 @@ export default function TotemExperience() {
     setSpeedScore(0)
     setSelectedBox(null)
     setReward(null)
+    setFlippedCards([])
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
 
-  // 1. Reset por Inatividade (2 minutos)
+  // Inactivity Reset (2 minutes)
   React.useEffect(() => {
     if (state === 'hero') return;
     const timer = setTimeout(() => resetToHero(), 120000);
@@ -49,7 +54,7 @@ export default function TotemExperience() {
     };
   }, [state, resetToHero]);
 
-  // 2. Reset Automático Final (15 segundos na tela de QR)
+  // Final Auto-Reset (15 seconds on QR screen)
   React.useEffect(() => {
     if (state === 'qr-code') {
       const timer = setTimeout(() => resetToHero(), 15000);
@@ -66,11 +71,11 @@ export default function TotemExperience() {
     }, 800)
   }
 
-  // Wheel Logic (3s duration)
+  // Wheel Logic
   const spinWheel = () => {
     if (isSpinning) return
     setIsSpinning(true)
-    const extraDegrees = 1440 + Math.random() * 360
+    const extraDegrees = 1800 + Math.random() * 360
     const newRotation = rotation + extraDegrees
     setRotation(newRotation)
     setTimeout(() => {
@@ -79,7 +84,7 @@ export default function TotemExperience() {
     }, 3000)
   }
 
-  // Speed Game Logic (5s duration)
+  // Speed Game Logic
   const startSpeedGame = () => {
     setSpeedScore(0)
     setTimeLeft(5)
@@ -109,16 +114,77 @@ export default function TotemExperience() {
     }
   }, [speedActive, timeLeft])
 
+  // Memory Game Logic
+  const initMemoryGame = () => {
+    const icons = [Smartphone, Box, RotateCcw, Zap, Star, Trophy];
+    const cards = [...icons, ...icons]
+      .sort(() => Math.random() - 0.5)
+      .map((Icon, index) => ({
+        id: index,
+        icon: Icon,
+        isFlipped: false,
+        isMatched: false
+      }));
+    setMemoryCards(cards);
+    setFlippedCards([]);
+    setState('game-memory');
+  }
+
+  const handleCardClick = (id: number) => {
+    if (flippedCards.length === 2 || memoryCards[id].isFlipped || memoryCards[id].isMatched) return;
+
+    const newFlipped = [...flippedCards, id];
+    setFlippedCards(newFlipped);
+
+    const newCards = memoryCards.map(card => 
+      card.id === id ? { ...card, isFlipped: true } : card
+    );
+    setMemoryCards(newCards);
+
+    if (newFlipped.length === 2) {
+      const [first, second] = newFlipped;
+      if (memoryCards[first].icon === memoryCards[second].icon) {
+        const matchedCards = newCards.map(card => 
+          card.id === first || card.id === second ? { ...card, isMatched: true } : card
+        );
+        setMemoryCards(matchedCards);
+        setFlippedCards([]);
+        if (matchedCards.every(card => card.isMatched)) {
+          setTimeout(() => finalizeGame('Jogo da Memória'), 800);
+        }
+      } else {
+        setTimeout(() => {
+          setMemoryCards(memoryCards.map(card => 
+            card.id === first || card.id === second ? { ...card, isFlipped: false } : card
+          ));
+          setFlippedCards([]);
+        }, 1000);
+      }
+    }
+  }
+
   return (
-    <main className="fixed inset-0 w-screen h-screen flex flex-col bg-[#F7F8FA] overflow-hidden select-none">
+    <main className={cn(
+      "fixed inset-0 w-screen h-screen flex flex-col overflow-hidden select-none transition-all duration-700 ease-in-out",
+      state === 'hero' ? "bg-gradient-to-br from-[#001D3D] via-[#001021] to-[#000814]" : "bg-[#F7F8FA]"
+    )}>
       
       {/* Header Fixo */}
-      <header className="h-24 px-12 flex justify-between items-center glass-nav border-b border-black/5 z-50">
-        <div className="flex items-center gap-4" onClick={resetToHero}>
-          <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center">
-            <Smartphone className="w-6 h-6 text-white" />
+      <header className={cn(
+        "h-24 px-12 flex justify-between items-center z-50 transition-colors duration-500",
+        state === 'hero' ? "bg-transparent border-white/5" : "glass-nav border-b border-black/5"
+      )}>
+        <div className="flex items-center gap-4 cursor-pointer" onClick={resetToHero}>
+          <div className={cn(
+            "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors",
+            state === 'hero' ? "bg-white text-blue-950" : "bg-black text-white"
+          )}>
+            <Smartphone className="w-6 h-6" />
           </div>
-          <span className="text-2xl font-bold tracking-tight">MA Discovery</span>
+          <span className={cn(
+            "text-2xl font-bold tracking-tight transition-colors",
+            state === 'hero' ? "text-white" : "text-black"
+          )}>MA Discovery</span>
         </div>
         {state !== 'hero' && (
           <button onClick={resetToHero} className="flex items-center gap-2 text-lg font-bold opacity-30 active:opacity-100">
@@ -132,13 +198,18 @@ export default function TotemExperience() {
         {/* TELA 1: HERO */}
         {state === 'hero' && (
           <div className="flex flex-col items-center text-center px-12 animate-reveal max-w-5xl">
-            <h1 className="text-[clamp(3.5rem,10vw,7rem)] font-extrabold tracking-tight leading-[1] mb-12">
-              Teste sua sorte.
+            <h1 className="text-[clamp(3.5rem,10vw,7rem)] font-extrabold tracking-tight leading-[1] mb-12 text-white">
+              Teste sua <span className="text-white/40">sorte.</span>
             </h1>
-            <p className="text-2xl md:text-3xl text-black/50 font-medium mb-20 max-w-3xl leading-relaxed">
+            <p className="text-2xl md:text-3xl text-white/50 font-medium mb-20 max-w-3xl leading-relaxed">
               Interaja com nossa tecnologia e ganhe um benefício exclusivo agora mesmo.
             </p>
-            <GlassButton size="totem" onClick={() => setState('choice')} className="w-full max-w-md">
+            <GlassButton 
+              size="totem" 
+              variant="secondary"
+              onClick={() => setState('choice')} 
+              className="w-full max-w-md shadow-[0_20px_60px_rgba(255,255,255,0.1)]"
+            >
               COMEÇAR <ChevronRight className="w-8 h-8" />
             </GlassButton>
           </div>
@@ -148,22 +219,23 @@ export default function TotemExperience() {
         {state === 'choice' && (
           <div className="w-full max-w-7xl px-12 animate-reveal text-center">
             <h2 className="text-5xl font-bold mb-20 tracking-tight">Qual desafio você prefere?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               {[
-                { id: 'game-box', icon: Box, name: 'Caixa Surpresa', desc: 'Sua intuição.' },
-                { id: 'game-wheel', icon: RotateCcw, name: 'Roleta Tech', desc: 'Momento de sorte.' },
-                { id: 'game-speed', icon: Zap, name: 'Toque Rápido', desc: 'Reflexos digitais.' },
+                { id: 'game-box', icon: Box, name: 'Caixa Surpresa', desc: 'Sua intuição.', action: () => setState('game-box') },
+                { id: 'game-wheel', icon: RotateCcw, name: 'Roleta Tech', desc: 'Sorte pura.', action: () => setState('game-wheel') },
+                { id: 'game-speed', icon: Zap, name: 'Toque Rápido', desc: 'Seus reflexos.', action: () => setState('game-speed') },
+                { id: 'game-memory', icon: Star, name: 'Memória', desc: 'Foco total.', action: initMemoryGame },
               ].map((game) => (
                 <button
                   key={game.id}
-                  onClick={() => setState(game.id as any)}
-                  className="bg-white p-16 rounded-[40px] shadow-sm border border-black/5 flex flex-col items-center group active:scale-95 transition-all duration-300"
+                  onClick={game.action}
+                  className="bg-white p-12 rounded-[40px] shadow-sm border border-black/5 flex flex-col items-center group active:scale-95 transition-all duration-300"
                 >
-                  <div className="w-24 h-24 rounded-3xl bg-black/5 flex items-center justify-center mb-10 group-active:bg-black group-active:text-white transition-colors">
-                    <game.icon className="w-10 h-10" />
+                  <div className="w-20 h-20 rounded-3xl bg-black/5 flex items-center justify-center mb-8 group-active:bg-black group-active:text-white transition-colors">
+                    <game.icon className="w-8 h-8" />
                   </div>
-                  <h3 className="text-3xl font-bold mb-4 tracking-tight">{game.name}</h3>
-                  <p className="text-xl text-black/40 font-medium">{game.desc}</p>
+                  <h3 className="text-2xl font-bold mb-2 tracking-tight">{game.name}</h3>
+                  <p className="text-lg text-black/40 font-medium">{game.desc}</p>
                 </button>
               ))}
             </div>
@@ -254,6 +326,31 @@ export default function TotemExperience() {
           </div>
         )}
 
+        {/* GAME: MEMORY */}
+        {state === 'game-memory' && (
+          <div className="w-full max-w-4xl px-12 animate-reveal text-center">
+            <h2 className="text-4xl font-bold mb-12 opacity-40">Combine os pares</h2>
+            <div className="grid grid-cols-4 gap-6">
+              {memoryCards.map((card) => (
+                <button
+                  key={card.id}
+                  onClick={() => handleCardClick(card.id)}
+                  className={cn(
+                    "aspect-square rounded-3xl border border-black/5 flex items-center justify-center text-4xl transition-all duration-500 transform perspective-1000",
+                    card.isFlipped || card.isMatched ? "bg-white rotate-y-0" : "bg-black/5 rotate-y-180"
+                  )}
+                >
+                  {(card.isFlipped || card.isMatched) ? (
+                    <card.icon className="w-12 h-12 text-black" />
+                  ) : (
+                    <div className="w-12 h-12 bg-black/10 rounded-full" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* TELA 3: RESULTADO */}
         {state === 'result' && (
           <div className="flex flex-col items-center text-center px-12 animate-reveal">
@@ -306,8 +403,14 @@ export default function TotemExperience() {
       </div>
 
       {/* Footer Fixo */}
-      <footer className="h-20 px-12 flex justify-center items-center border-t border-black/5 bg-white/50">
-        <span className="text-xs tracking-[0.6em] font-black uppercase opacity-10">
+      <footer className={cn(
+        "h-20 px-12 flex justify-center items-center border-t transition-colors duration-500",
+        state === 'hero' ? "border-white/5 bg-black/20" : "border-black/5 bg-white/50"
+      )}>
+        <span className={cn(
+          "text-xs tracking-[0.6em] font-black uppercase opacity-10",
+          state === 'hero' ? "text-white" : "text-black"
+        )}>
           MA IMPORTS — PREMIUM KIOSK EXPERIENCE
         </span>
       </footer>
