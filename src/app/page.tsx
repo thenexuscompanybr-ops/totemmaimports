@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -489,9 +488,15 @@ export default function TotemExperience() {
 
         {state === 'google-incentive' && (
           <div className="flex flex-col items-center text-center animate-reveal max-w-4xl px-4">
-            <div className="flex gap-2 mb-10">
+            <div className="flex gap-4 mb-10">
               {[1, 2, 3, 4, 5].map((i) => (
-                <Star key={i} className="w-12 h-12 text-[#C5A059] fill-[#C5A059]" />
+                <div 
+                  key={i} 
+                  className="animate-star-pop opacity-0"
+                  style={{ animationDelay: `${i * 150}ms` }}
+                >
+                  <Star className="w-14 h-14 text-[#C5A059] fill-[#C5A059] filter drop-shadow-[0_0_15px_rgba(197,160,89,0.4)]" />
+                </div>
               ))}
             </div>
             <h2 className="text-[clamp(2.5rem,8vw,5.5rem)] font-black mb-10 tracking-tighter text-white uppercase leading-tight">
