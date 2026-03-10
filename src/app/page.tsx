@@ -12,6 +12,7 @@ import { GlassButton } from "@/components/ma/GlassButton"
 import { CouponRewards, saveGameSession } from "@/lib/coupon-service"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { cn } from "@/lib/utils"
+import { Slider } from "@/components/ui/slider"
 
 type AppState = 'hero' | 'choice' | 'game-box' | 'game-wheel' | 'game-speed' | 'game-memory' | 'result' | 'google-incentive' | 'qr-code'
 type SpinState = 'idle' | 'spinning' | 'stopping'
@@ -23,6 +24,9 @@ export default function TotemExperience() {
   // Game States
   const [spinPhase, setSpinPhase] = React.useState<SpinState>('idle')
   const [rotation, setRotation] = React.useState(0)
+  const [spinSpeed, setSpinSpeed] = React.useState([1.5])
+  const wheelRef = React.useRef<HTMLDivElement>(null)
+
   const [speedScore, setSpeedScore] = React.useState(0)
   const [speedActive, setSpeedActive] = React.useState(false)
   const [timeLeft, setTimeLeft] = React.useState(5)
@@ -79,19 +83,30 @@ export default function TotemExperience() {
     }, 800)
   }
 
-  // Improved Wheel Logic
+  // Improved Wheel Logic with Interaction
   const startSpinning = () => {
     setSpinPhase('spinning')
-    setRotation(r => r % 360)
+    setRotation(0)
   }
 
   const stopSpinning = () => {
+    if (!wheelRef.current) return
+    
+    // Captura a rotação atual para evitar saltos visuais (glitch)
+    const computedStyle = window.getComputedStyle(wheelRef.current)
+    const matrix = new DOMMatrixReadOnly(computedStyle.transform)
+    const currentAngle = Math.atan2(matrix.b, matrix.a) * (180 / Math.PI)
+    
     setSpinPhase('stopping')
+    
     const prizeIndex = Math.floor(Math.random() * CouponRewards.length)
     const selectedPrize = CouponRewards[prizeIndex]
     const sliceAngle = 360 / CouponRewards.length
-    const targetRotation = 360 - (prizeIndex * sliceAngle)
-    const finalRotation = rotation + (360 * 5) + targetRotation - (rotation % 360)
+    
+    // Calcula o destino final (5 voltas completas + compensação do prêmio)
+    const targetSliceRotation = 360 - (prizeIndex * sliceAngle)
+    const finalRotation = currentAngle + (360 * 5) + targetSliceRotation - (currentAngle % 360)
+    
     setRotation(finalRotation)
     
     setTimeout(() => {
@@ -277,17 +292,21 @@ export default function TotemExperience() {
 
         {state === 'game-wheel' && (
           <div className="flex flex-col items-center animate-reveal">
-            <div className="relative mb-12">
+            <div className="relative mb-8">
               <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-40">
                 <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[40px] border-t-[#C5A059] filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]" />
               </div>
               <div className="p-6 bg-white/5 rounded-full border border-white/10 backdrop-blur-3xl relative">
                 <div 
+                  ref={wheelRef}
                   className={cn(
-                    "w-[450px] h-[450px] md:w-[600px] md:h-[600px] rounded-full bg-white/5 relative transition-transform duration-[3200ms] ease-[cubic-bezier(0.15,0,0.1,1)] flex items-center justify-center overflow-hidden border-4 border-[#C5A059]/20",
-                    spinPhase === 'spinning' && "animate-[spin_1s_linear_infinite]"
+                    "w-[400px] h-[400px] md:w-[500px] md:h-[500px] rounded-full bg-white/5 relative flex items-center justify-center overflow-hidden border-4 border-[#C5A059]/20 transition-transform duration-[3200ms] ease-[cubic-bezier(0.15,0,0.1,1)]",
+                    spinPhase === 'spinning' && "animate-[spin_var(--spin-dur)_linear_infinite]"
                   )}
-                  style={{ transform: spinPhase === 'stopping' ? `rotate(${rotation}deg)` : undefined }}
+                  style={{ 
+                    transform: spinPhase === 'stopping' ? `rotate(${rotation}deg)` : undefined,
+                    '--spin-dur': `${2 / spinSpeed[0]}s`
+                  } as React.CSSProperties}
                 >
                   {CouponRewards.map((prize, i) => (
                     <div 
@@ -300,15 +319,14 @@ export default function TotemExperience() {
                       }} 
                     >
                        <div 
-                        className="absolute top-12 left-1/2 -translate-x-1/2 text-white font-black text-xs md:text-sm uppercase tracking-tighter text-center max-w-[100px]"
-                        style={{ transform: 'rotate(0deg)' }}
+                        className="absolute top-12 left-1/2 -translate-x-1/2 text-white font-black text-[10px] md:text-xs uppercase tracking-tighter text-center max-w-[80px]"
                        >
                          {prize}
                        </div>
                     </div>
                   ))}
-                  <div className="absolute z-30 w-28 h-28 bg-[#001D3D] rounded-full shadow-[0_0_80px_rgba(0,0,0,0.8)] border-4 border-[#C5A059] flex items-center justify-center">
-                    <div className="relative w-14 h-14">
+                  <div className="absolute z-30 w-24 h-24 bg-[#001D3D] rounded-full shadow-[0_0_80px_rgba(0,0,0,0.8)] border-4 border-[#C5A059] flex items-center justify-center">
+                    <div className="relative w-12 h-12">
                       <Image src={maLogo} alt="MA Logo" fill className="object-contain" />
                     </div>
                   </div>
@@ -316,28 +334,46 @@ export default function TotemExperience() {
               </div>
             </div>
 
-            <div className="w-full max-w-md">
-              {spinPhase === 'idle' && (
-                <GlassButton variant="gold" onClick={startSpinning} className="w-full">
-                  GIRAR AGORA
-                </GlassButton>
-              )}
-              
-              {spinPhase === 'spinning' && (
-                <GlassButton 
-                  variant="gold" 
-                  onClick={stopSpinning} 
-                  className="w-full bg-red-600 text-white shadow-[0_0_60px_rgba(220,38,38,0.2)]"
-                >
-                  PARAR!
-                </GlassButton>
-              )}
+            <div className="w-full max-w-md space-y-8">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center text-xs font-black uppercase tracking-[0.2em] text-white/30">
+                  <span>Intensidade do Giro</span>
+                  <span className="text-[#C5A059]">{spinSpeed[0].toFixed(1)}x</span>
+                </div>
+                <Slider 
+                  value={spinSpeed} 
+                  onValueChange={setSpinSpeed} 
+                  min={0.5} 
+                  max={4} 
+                  step={0.1} 
+                  disabled={spinPhase !== 'idle'}
+                  className="py-4"
+                />
+              </div>
 
-              {spinPhase === 'stopping' && (
-                <GlassButton variant="gold" disabled className="w-full opacity-80">
-                  SORTEANDO...
-                </GlassButton>
-              )}
+              <div className="pt-4">
+                {spinPhase === 'idle' && (
+                  <GlassButton variant="gold" onClick={startSpinning} className="w-full">
+                    GIRAR AGORA
+                  </GlassButton>
+                )}
+                
+                {spinPhase === 'spinning' && (
+                  <GlassButton 
+                    variant="gold" 
+                    onClick={stopSpinning} 
+                    className="w-full bg-red-600 text-white shadow-[0_0_60px_rgba(220,38,38,0.2)] border-red-500"
+                  >
+                    PARAR!
+                  </GlassButton>
+                )}
+
+                {spinPhase === 'stopping' && (
+                  <GlassButton variant="gold" disabled className="w-full opacity-80">
+                    SORTEANDO...
+                  </GlassButton>
+                )}
+              </div>
             </div>
           </div>
         )}
