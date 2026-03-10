@@ -489,10 +489,8 @@ export default function TotemExperience() {
 
         {state === 'google-incentive' && (
           <div className="flex flex-col items-center text-center animate-reveal">
-            <div className="bg-white p-6 rounded-[40px] mb-12 shadow-2xl">
-              <div className="relative w-40 h-40">
-                <Image src={qrImage} alt="QR Code" fill className="object-contain" />
-              </div>
+            <div className="w-32 h-32 rounded-[32px] bg-white/5 border border-[#C5A059]/30 flex items-center justify-center mb-12 shadow-2xl backdrop-blur-3xl">
+              <Star className="w-16 h-16 text-[#C5A059]" />
             </div>
             <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-tighter text-white uppercase">Sua opinião é ouro</h2>
             <p className="text-xl text-white/40 font-medium mb-16 max-w-2xl leading-relaxed">
