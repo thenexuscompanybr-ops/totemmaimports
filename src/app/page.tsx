@@ -12,7 +12,6 @@ import { GlassButton } from "@/components/ma/GlassButton"
 import { CouponRewards, saveGameSession } from "@/lib/coupon-service"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { cn } from "@/lib/utils"
-import { Slider } from "@/components/ui/slider"
 
 type AppState = 'hero' | 'choice' | 'game-box' | 'game-wheel' | 'game-speed' | 'game-memory' | 'result' | 'google-incentive' | 'qr-code'
 type SpinState = 'idle' | 'spinning' | 'stopping' | 'dragging'
@@ -24,7 +23,6 @@ export default function TotemExperience() {
   // Game States
   const [spinPhase, setSpinPhase] = React.useState<SpinState>('idle')
   const [rotation, setRotation] = React.useState(0)
-  const [spinSpeed, setSpinSpeed] = React.useState([1.5])
   const wheelRef = React.useRef<HTMLDivElement>(null)
   
   // Interaction Refs
@@ -131,25 +129,28 @@ export default function TotemExperience() {
   const handlePointerUp = () => {
     if (spinPhase !== 'dragging') return
     
-    // If flick velocity is high enough, start spinning
-    if (Math.abs(velocity.current) > 0.5) {
-      const speed = Math.min(Math.max(Math.abs(velocity.current) * 2, 0.5), 4)
-      setSpinSpeed([speed])
-      startSpinning()
+    // If flick velocity is high enough, start spinning then stop automatically
+    if (Math.abs(velocity.current) > 0.3) {
+      startSpinningAuto()
     } else {
       setSpinPhase('idle')
     }
   }
 
-  const startSpinning = () => {
+  const startSpinningAuto = () => {
     setSpinPhase('spinning')
-    // Reset rotation to a manageable number if it got huge during drag
     setRotation(prev => prev % 360)
+    
+    // Automatically trigger stop after a short "fast spin" period
+    setTimeout(() => {
+      stopSpinning()
+    }, 1200)
   }
 
   const stopSpinning = () => {
     if (!wheelRef.current) return
     
+    // Catch current rotation from the animation
     const computedStyle = window.getComputedStyle(wheelRef.current)
     const matrix = new DOMMatrixReadOnly(computedStyle.transform)
     const currentAngle = Math.atan2(matrix.b, matrix.a) * (180 / Math.PI)
@@ -160,6 +161,7 @@ export default function TotemExperience() {
     const selectedPrize = CouponRewards[prizeIndex]
     const sliceAngle = 360 / CouponRewards.length
     
+    // Calculate final landing position
     const targetSliceRotation = 360 - (prizeIndex * sliceAngle)
     const finalRotation = currentAngle + (360 * 5) + targetSliceRotation - (currentAngle % 360)
     
@@ -169,8 +171,6 @@ export default function TotemExperience() {
       finalizeGame('Roda Tech', selectedPrize)
     }, 3200)
   }
-
-  // --- GAME LOGIC END ---
 
   // Speed Game Logic
   const startSpeedGame = () => {
@@ -363,12 +363,11 @@ export default function TotemExperience() {
                   onPointerLeave={handlePointerUp}
                   className={cn(
                     "w-[400px] h-[400px] md:w-[500px] md:h-[500px] rounded-full bg-white/5 relative flex items-center justify-center overflow-hidden border-4 border-[#C5A059]/20 cursor-grab active:cursor-grabbing",
-                    spinPhase === 'spinning' && "animate-[spin_var(--spin-dur)_linear_infinite]"
+                    spinPhase === 'spinning' && "animate-[spin_0.8s_linear_infinite]"
                   )}
                   style={{ 
                     transform: (spinPhase === 'stopping' || spinPhase === 'idle' || spinPhase === 'dragging') ? `rotate(${rotation}deg)` : undefined,
                     transition: spinPhase === 'stopping' ? 'transform 3.2s cubic-bezier(0.15, 0, 0.1, 1)' : 'none',
-                    '--spin-dur': `${2 / spinSpeed[0]}s`
                   } as React.CSSProperties}
                 >
                   {CouponRewards.map((prize, i) => (
@@ -400,44 +399,18 @@ export default function TotemExperience() {
             <div className="w-full max-w-md space-y-8">
               <div className="text-center mb-4">
                 <p className="text-[#C5A059] font-black uppercase text-xs tracking-[0.2em] animate-pulse">
-                  Deslize para girar ou use os controles abaixo
+                  Deslize rápido para girar
                 </p>
               </div>
               
-              <div className="space-y-4">
-                <div className="flex justify-between items-center text-xs font-black uppercase tracking-[0.2em] text-white/30">
-                  <span>Velocidade Manual</span>
-                  <span className="text-[#C5A059]">{spinSpeed[0].toFixed(1)}x</span>
-                </div>
-                <Slider 
-                  value={spinSpeed} 
-                  onValueChange={setSpinSpeed} 
-                  min={0.5} 
-                  max={4} 
-                  step={0.1} 
-                  disabled={spinPhase !== 'idle'}
-                  className="py-4"
-                />
-              </div>
-
               <div className="pt-4">
-                {(spinPhase === 'idle' || spinPhase === 'dragging') && (
-                  <GlassButton variant="gold" onClick={startSpinning} className="w-full">
+                {spinPhase === 'idle' && (
+                  <GlassButton variant="gold" onClick={startSpinningAuto} className="w-full">
                     GIRAR AGORA
                   </GlassButton>
                 )}
                 
-                {spinPhase === 'spinning' && (
-                  <GlassButton 
-                    variant="gold" 
-                    onClick={stopSpinning} 
-                    className="w-full bg-red-600 text-white shadow-[0_0_60px_rgba(220,38,38,0.2)] border-red-500"
-                  >
-                    PARAR!
-                  </GlassButton>
-                )}
-
-                {spinPhase === 'stopping' && (
+                {(spinPhase === 'spinning' || spinPhase === 'stopping') && (
                   <GlassButton variant="gold" disabled className="w-full opacity-80">
                     SORTEANDO...
                   </GlassButton>
@@ -500,8 +473,10 @@ export default function TotemExperience() {
 
         {state === 'result' && (
           <div className="flex flex-col items-center text-center animate-reveal">
-            <div className="w-20 h-20 rounded-[20px] bg-[#C5A059] flex items-center justify-center mb-8 shadow-[0_20px_40px_rgba(197,160,89,0.3)] animate-float">
-              <Trophy className="w-10 h-10 text-[#001D3D]" />
+            <div className="w-32 h-32 rounded-[32px] bg-white flex items-center justify-center mb-8 shadow-2xl p-4">
+              <div className="relative w-full h-full">
+                <Image src={qrImage} alt="QR" fill className="object-contain" />
+              </div>
             </div>
             <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tighter text-white uppercase">Excelente!</h2>
             <p className="text-sm uppercase tracking-[0.4em] font-black text-white/30 mb-8">Seu benefício exclusivo é:</p>
@@ -516,12 +491,14 @@ export default function TotemExperience() {
 
         {state === 'google-incentive' && (
           <div className="flex flex-col items-center text-center animate-reveal">
-            <div className="flex gap-3 mb-12">
-              {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-10 h-10 fill-[#C5A059] text-[#C5A059] animate-reveal" style={{ animationDelay: `${i*100}ms` }} />)}
+            <div className="bg-white p-6 rounded-[40px] mb-12 shadow-2xl">
+              <div className="relative w-40 h-40">
+                <Image src={qrImage} alt="QR Code" fill className="object-contain" />
+              </div>
             </div>
-            <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-tighter text-white uppercase">Avalie sua experiência</h2>
+            <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-tighter text-white uppercase">Sua opinião é ouro</h2>
             <p className="text-xl text-white/40 font-medium mb-16 max-w-2xl leading-relaxed">
-              Sua avaliação ajuda a MA Imports a oferecer serviços cada vez melhores.
+              Avalie nossa loja no Google e ajude a MA Imports a crescer.
             </p>
             <GlassButton variant="gold" onClick={() => setState('qr-code')} className="w-full max-w-lg">
               AVALIAR AGORA
@@ -531,8 +508,8 @@ export default function TotemExperience() {
 
         {state === 'qr-code' && (
           <div className="flex flex-col items-center text-center animate-reveal">
-            <div className="bg-white p-8 rounded-[48px] mb-12 shadow-[0_40px_80px_rgba(0,0,0,0.5)] animate-reveal">
-              <div className="relative w-64 h-64">
+            <div className="bg-white p-10 rounded-[64px] mb-12 shadow-[0_40px_100px_rgba(0,0,0,0.6)] animate-reveal">
+              <div className="relative w-80 h-80 md:w-[450px] md:h-[450px]">
                 <Image 
                   src={qrImage} 
                   alt="QR Code Google Review" 
@@ -541,9 +518,9 @@ export default function TotemExperience() {
                 />
               </div>
             </div>
-            <h2 className="text-3xl font-black mb-4 tracking-tighter text-white uppercase">Escaneie para avaliar</h2>
-            <p className="text-sm text-white/30 font-black uppercase tracking-[0.3em] mb-16">
-              Obrigado pela preferência!
+            <h2 className="text-4xl font-black mb-4 tracking-tighter text-white uppercase">Escaneie para avaliar</h2>
+            <p className="text-xs text-white/30 font-black uppercase tracking-[0.5em] mb-16">
+              OBRIGADO PELA PREFERÊNCIA — MA IMPORTS
             </p>
             <div className="text-xs font-black text-[#C5A059]/40 uppercase tracking-[0.2em] animate-pulse">
               Reiniciando totem em instantes...
